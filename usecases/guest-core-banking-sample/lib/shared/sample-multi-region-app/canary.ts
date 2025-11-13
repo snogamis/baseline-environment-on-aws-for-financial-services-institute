@@ -2,7 +2,7 @@ import { Construct } from 'constructs';
 import * as synthetics from 'aws-cdk-lib/aws-synthetics';
 import { Duration } from 'aws-cdk-lib';
 import { join } from 'path';
-import { IVpc } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetType } from 'aws-cdk-lib/aws-ec2';
 
 export interface CanaryProps {
   vpc: IVpc;
@@ -25,12 +25,15 @@ export class Canary extends Construct {
         code: synthetics.Code.fromAsset(join(__dirname, 'canary')),
         handler: 'index.handler',
       }),
-      runtime: synthetics.Runtime.SYNTHETICS_NODEJS_PUPPETEER_7_0,
+      runtime: synthetics.Runtime.SYNTHETICS_NODEJS_PUPPETEER_9_0,
       environmentVariables: {
         BASE_URL: props.targetApiUrl,
       },
       vpc,
-      vpcSubnets: vpc.selectSubnets({ subnets: vpc.privateSubnets.concat(vpc.isolatedSubnets) }),
+      // S3エンドポイントが利用可能なサブネットを優先的に使用
+      vpcSubnets: vpc.selectSubnets({
+        subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+      }),
     });
 
     this.canaryName = canary.canaryName;

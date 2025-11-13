@@ -155,7 +155,7 @@ exports[`Core Banking System Stack should create core banking system stack 1`] =
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "4cd2f2411231aa073e609dc99a49b5c5e974252bf9abf0f9350d237d17cce8be.zip",
+          "S3Key": "8d5e97812d0036272ba1fd5bb8772ff51f4712e58c75507e4a0db242bf680f1d.zip",
         },
         "Handler": "index.handler",
         "Role": {
@@ -164,7 +164,7 @@ exports[`Core Banking System Stack should create core banking system stack 1`] =
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -983,6 +983,9 @@ exports[`Core Banking System Stack should create core banking system stack 1`] =
         "CoreBankingApiapitransactionswithdraw40858676",
         "CoreBankingApiOPTIONS12D90704",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Core Banking System API with IAM Authentication for Mobile Banking Backend",
         "RestApiId": {
@@ -3532,7 +3535,7 @@ exports[`Online Banking App Backend Stack should create backend stack 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "4cd2f2411231aa073e609dc99a49b5c5e974252bf9abf0f9350d237d17cce8be.zip",
+          "S3Key": "8d5e97812d0036272ba1fd5bb8772ff51f4712e58c75507e4a0db242bf680f1d.zip",
         },
         "Handler": "index.handler",
         "Role": {
@@ -3541,7 +3544,7 @@ exports[`Online Banking App Backend Stack should create backend stack 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -5105,6 +5108,9 @@ exports[`Online Banking App Backend Stack should create backend stack 1`] = `
         "BankingApiapiusers1850CC6D",
         "BankingApiOPTIONSECCA8619",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Online Banking API for mobile apps",
         "RestApiId": {
@@ -8714,7 +8720,7 @@ exports[`Online Banking App Backend Stack should create backend stack 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "094055a7ae08fc07ce210273804573105701f0067096ff927eb2d92174697efb.zip",
+          "S3Key": "a3fb5d49b203da1f8625eeb5fb3ba74662a51000c5277b533f49dcffdb2d3917.zip",
         },
         "Environment": {
           "Variables": {
@@ -11797,7 +11803,7 @@ exports[`Online Banking App Frontend Stack should create frontend stack 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "4fe0aba5e672b596d0f72505a9eec502f98d46906bb30fae2511fbdc1df4956f.zip",
+          "S3Key": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip",
         },
         "Environment": {
           "Variables": {
@@ -11816,7 +11822,7 @@ exports[`Online Banking App Frontend Stack should create frontend stack 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12004,7 +12010,7 @@ exports[`Online Banking App Frontend Stack should create frontend stack 1`] = `
       "Properties": {
         "Content": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "12157b27d30ab71eb24ae65825f672ba5cc2c09dbb1703cd7adfcff3aeaca136.zip",
+          "S3Key": "c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -12051,7 +12057,12 @@ exports[`Online Banking App Frontend Stack should create frontend stack 1`] = `
             },
           },
         ],
+        "SourceMarkersConfig": [
+          {},
+          {},
+        ],
         "SourceObjectKeys": Any<Array>,
+        "WaitForDistributionInvalidation": true,
       },
       "Type": "Custom::CDKBucketDeployment",
       "UpdateReplacePolicy": "Delete",

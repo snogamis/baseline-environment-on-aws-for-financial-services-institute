@@ -21,6 +21,7 @@ import { ServiceLinkedRole } from 'upsert-slr';
 import { SampleMultiRegionApp } from '../shared/sample-multi-region-app/app';
 import { SampleAppClient } from '../shared/sample-multi-region-app/app-client';
 import { Backup } from './backup';
+import { ApplicationSignalsConfig } from '../shared/application-signals-config';
 /*
  * BLEA-FSI Core Banking Sample application stack(Primaly Region)
  */
@@ -152,6 +153,13 @@ export class CoreBankingPrimaryStack extends cdk.Stack {
 
     //マルチリージョン 勘定系サンプルアプリのデプロイ
     if (SampleMultiRegionAppParameter.deploy == true) {
+      // Application Signals 用の SSM パラメータを作成
+      // SampleMultiRegionApp の前に作成して依存関係を保証
+      const applicationSignalsConfig = new ApplicationSignalsConfig(this, 'ApplicationSignalsConfig', {
+        envName,
+        region: primary.region,
+      });
+
       const app = new SampleMultiRegionApp(this, 'SampleMultiRegionApp', {
         mainDynamoDbTableName: this.dynamoDb.tableName,
         balanceDatabase: this.PrimaryDB,
@@ -159,7 +167,10 @@ export class CoreBankingPrimaryStack extends cdk.Stack {
         vpc: primaryVpc.myVpc,
         hostedZone: this.hostedZone.privateHostedZone,
         alarmTopic: monitorPrimaryAlarm.alarmTopic,
+        cwAgentConfigParameter: applicationSignalsConfig.parameter,
       });
+      // SampleMultiRegionApp が ApplicationSignalsConfig に依存することを明示
+      app.node.addDependency(applicationSignalsConfig);
       this.sampleMultiRegionApp = app;
 
       new SampleAppClient(this, 'SampleAppClient', {

@@ -208,6 +208,8 @@ export class Vpc extends Construct {
     // 既存のエンドポイントを両方のサブネットタイプで使用する
 
     // S3 Gateway endpoint (no security group needed for gateway endpoints)
+    // Canary Lambda用にProtectedサブネットのみに配置
+    // ForTgwAttachmentsサブネットは除外（TGW用で不要）
     myVpc.addGatewayEndpoint('S3EndpointEnhanced', {
       service: ec2.GatewayVpcEndpointAwsService.S3,
       subnets: [{ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }],

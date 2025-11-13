@@ -11,6 +11,7 @@ import { AssociateVpcWithZone } from '../shared/associate-vpc-with-zone';
 import { StackParameter, SampleEcsAppParameter, SampleMultiRegionAppParameter } from '../../bin/parameter';
 //マルチリージョン 勘定系サンプルアプリ
 import { SampleMultiRegionApp } from '../shared/sample-multi-region-app/app';
+import { ApplicationSignalsConfig } from '../shared/application-signals-config';
 
 interface CoreBankingSecondaryStackProps extends StackParameter {
   auroraSecretName: string;
@@ -96,6 +97,13 @@ export class CoreBankingSecondaryStack extends cdk.Stack {
 
     //マルチリージョン 勘定系サンプルアプリのデプロイ
     if (SampleMultiRegionAppParameter.deploy == true) {
+      // Application Signals 用の SSM パラメータを作成
+      // SampleMultiRegionApp の前に作成して依存関係を保証
+      const applicationSignalsConfig = new ApplicationSignalsConfig(this, 'ApplicationSignalsConfig', {
+        envName,
+        region: secondary.region,
+      });
+
       const app = new SampleMultiRegionApp(this, 'SampleMultiRegionApp', {
         mainDynamoDbTableName: props.dynamoDbGlobalTableName,
         balanceDatabase: this.secondaryDB,
@@ -103,7 +111,10 @@ export class CoreBankingSecondaryStack extends cdk.Stack {
         vpc: secondaryVpc.myVpc,
         hostedZone: associateVpcWithHostedZone.hostedZone,
         alarmTopic: monitorSecondaryAlarm.alarmTopic,
+        cwAgentConfigParameter: applicationSignalsConfig.parameter,
       });
+      // SampleMultiRegionApp が ApplicationSignalsConfig に依存することを明示
+      app.node.addDependency(applicationSignalsConfig);
       this.sampleMultiRegionApp = app;
     }
 

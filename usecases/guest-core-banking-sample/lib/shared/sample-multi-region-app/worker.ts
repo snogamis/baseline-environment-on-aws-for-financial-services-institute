@@ -5,6 +5,7 @@ import { IVpc } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { IStringParameter } from 'aws-cdk-lib/aws-ssm';
 import { addCloudWatchApplicationSignals } from './cloudwatch-application-signals';
 import { NagSuppressions } from 'cdk-nag';
 
@@ -21,6 +22,11 @@ export interface SampleAppWorkerProps {
    * @default false
    */
   enableApplicationSignals?: boolean;
+
+  /**
+   * CloudWatch Agent 設定の SSM パラメータ（オプション）
+   */
+  cwAgentConfigParameter?: IStringParameter;
 }
 
 export class SampleAppWorker extends Construct {
@@ -38,7 +44,7 @@ export class SampleAppWorker extends Construct {
 
     // Application Signals を有効化（アプリケーションコンテナの前に実行）
     if (props.enableApplicationSignals) {
-      addCloudWatchApplicationSignals(taskDefinition);
+      addCloudWatchApplicationSignals(taskDefinition, props.cwAgentConfigParameter);
 
       // cdk-nag抑制: 実行ロールのデフォルトポリシーのワイルドカード権限を許可
       const executionRole = taskDefinition.executionRole;

@@ -44,7 +44,7 @@ export class DbAuroraPgGlobalPrimary extends Construct implements IAuroraGlobalC
     // Aurora Cluster
     const cluster = new rds.DatabaseCluster(this, 'AuroraCluster', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
-        version: rds.AuroraPostgresEngineVersion.VER_11_9,
+        version: rds.AuroraPostgresEngineVersion.VER_16_6,
       }),
       credentials: rds.Credentials.fromGeneratedSecret(props.dbUser, {
         replicaRegions: [
@@ -54,7 +54,7 @@ export class DbAuroraPgGlobalPrimary extends Construct implements IAuroraGlobalC
         ],
       }),
       instanceProps: {
-        instanceType: ec2.InstanceType.of(ec2.InstanceClass.R6G, ec2.InstanceSize.LARGE),
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.R7G, ec2.InstanceSize.LARGE),
         vpcSubnets: props.vpcSubnets,
         vpc: props.myVpc,
         enablePerformanceInsights: true,

@@ -1,7 +1,7 @@
 import { Stack } from 'aws-cdk-lib';
 import { TaskDefinition, ContainerImage, LogDriver, Secret } from 'aws-cdk-lib/aws-ecs';
 import { PolicyStatement, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { IStringParameter, StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { NagSuppressions } from 'cdk-nag';
 import { validateResourceConfigurationInDevelopment } from './resource-validation-utils';
 
@@ -15,16 +15,22 @@ import { validateResourceConfigurationInDevelopment } from './resource-validatio
  * - 必要な IAM 権限の追加
  *
  * @param taskDefinition - CloudWatch Agent サイドカーを追加する ECS タスク定義
+ * @param cwAgentConfigParameter - (オプション) CloudWatch Agent 設定の SSM パラメータ。指定しない場合は名前で参照
  */
-export const addCloudWatchApplicationSignals = (taskDefinition: TaskDefinition) => {
+export const addCloudWatchApplicationSignals = (
+  taskDefinition: TaskDefinition,
+  cwAgentConfigParameter?: IStringParameter,
+) => {
   // ボリュームを追加（OpenTelemetry自動計装用）
   taskDefinition.addVolume({
     name: 'opentelemetry-auto-instrumentation-node',
   });
 
-  // 共有のCloudWatch Agent設定をSSMパラメータから参照
+  // CloudWatch Agent設定をSSMパラメータから取得
+  // パラメータが渡された場合はそれを使用、そうでない場合は名前で参照
   const parameterName = '/ecs/cloudwatch-agent/application-signals-config';
-  const cwAgentConfig = StringParameter.fromStringParameterName(taskDefinition, 'CwAgentConfig', parameterName);
+  const cwAgentConfig =
+    cwAgentConfigParameter || StringParameter.fromStringParameterName(taskDefinition, 'CwAgentConfig', parameterName);
   // Application Signals に必要な権限をタスクロールに追加（正常動作環境と同じ権限）
   const taskRolePolicy = new PolicyStatement({
     actions: [

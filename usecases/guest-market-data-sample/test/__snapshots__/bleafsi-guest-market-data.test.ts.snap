@@ -17,7 +17,7 @@ exports[`BLEAFSI-MarketData snapshot check market data sample Stacks 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "4cd2f2411231aa073e609dc99a49b5c5e974252bf9abf0f9350d237d17cce8be.zip",
+          "S3Key": "8d5e97812d0036272ba1fd5bb8772ff51f4712e58c75507e4a0db242bf680f1d.zip",
         },
         "Handler": "index.handler",
         "Role": {
@@ -26,7 +26,7 @@ exports[`BLEAFSI-MarketData snapshot check market data sample Stacks 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -3502,16 +3502,6 @@ exports[`BLEAFSI-MarketData snapshot check market data sample Stacks 1`] = `
               "Resource": {
                 "Fn::GetAtt": [
                   "VpcVpcFlowLogsLogGroup8558C776",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "VpcVpcFlowLogsLogRoleED2BD382",
                   "Arn",
                 ],
               },

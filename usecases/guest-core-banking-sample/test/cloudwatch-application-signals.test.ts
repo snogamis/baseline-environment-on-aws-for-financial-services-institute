@@ -2,16 +2,23 @@ import { App, Stack } from 'aws-cdk-lib';
 import { Template, Match } from 'aws-cdk-lib/assertions';
 import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { Role, ServicePrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { addCloudWatchApplicationSignals } from '../lib/shared/sample-multi-region-app/cloudwatch-application-signals';
 
 describe('CloudWatch Application Signals Sidecar', () => {
   let app: App;
   let stack: Stack;
   let taskDefinition: FargateTaskDefinition;
+  let cwAgentConfig: StringParameter;
 
   beforeEach(() => {
     app = new App();
     stack = new Stack(app, 'TestStack');
+
+    // Create SSM parameter for CloudWatch Agent config
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { createApplicationSignalsParameter } = require('../lib/shared/application-signals-parameter');
+    cwAgentConfig = createApplicationSignalsParameter(stack);
 
     // Create execution role with ECR permissions for public ECR
     const executionRole = new Role(stack, 'ExecutionRole', {
@@ -35,7 +42,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('adds CloudWatch Agent sidecar container correctly', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -55,7 +62,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('adds required IAM permissions to execution role', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -135,7 +142,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('creates container with environment variables and secrets', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -163,7 +170,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('validates IAM permissions include required actions', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -199,7 +206,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('validates resource allocation for 512 CPU / 1024 MiB environment', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -224,7 +231,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('validates Fargate minimum requirements are met', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -239,7 +246,7 @@ describe('CloudWatch Application Signals Sidecar', () => {
 
   test('validates resource allocation efficiency', () => {
     // Act
-    addCloudWatchApplicationSignals(taskDefinition);
+    addCloudWatchApplicationSignals(taskDefinition, cwAgentConfig);
 
     // Assert
     const template = Template.fromStack(stack);
@@ -256,5 +263,26 @@ describe('CloudWatch Application Signals Sidecar', () => {
         }),
       ]),
     });
+  });
+
+  test('createApplicationSignalsParameter creates SSM parameter with default config', () => {
+    // Arrange
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { createApplicationSignalsParameter } = require('../lib/shared/application-signals-parameter');
+    const testStack = new Stack(app, 'TestStackForParameter');
+
+    // Act
+    const parameter = createApplicationSignalsParameter(testStack, 'TestApplicationSignalsConfig');
+
+    // Assert
+    const template = Template.fromStack(testStack);
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/ecs/cloudwatch-agent/application-signals-config',
+      Type: 'String',
+      Description: 'CloudWatch Application Signals configuration for ECS tasks',
+    });
+
+    expect(parameter).toBeDefined();
   });
 });

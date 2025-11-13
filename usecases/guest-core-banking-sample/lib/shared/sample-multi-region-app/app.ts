@@ -6,6 +6,7 @@ import { Cluster } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol, ListenerAction } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { IHostedZone } from 'aws-cdk-lib/aws-route53';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
+import { IStringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { SampleAppService } from './service';
 import { IAuroraGlobalCluster } from '../aurora-cluster';
@@ -21,6 +22,11 @@ export interface SampleMultiRegionAppProps {
   vpc: IVpc;
   hostedZone: IHostedZone;
   alarmTopic: Topic;
+  /**
+   * CloudWatch Agent 設定の SSM パラメータ（オプション）
+   * 指定しない場合は、デフォルトのパラメータ名で参照
+   */
+  cwAgentConfigParameter?: IStringParameter;
 }
 
 /**
@@ -89,6 +95,7 @@ export class SampleMultiRegionApp extends Construct {
       priority: 1,
       auroraDatabase: props.balanceDatabase,
       enableApplicationSignals: true,
+      cwAgentConfigParameter: props.cwAgentConfigParameter,
     });
 
     //Countサービスの起動
@@ -100,6 +107,7 @@ export class SampleMultiRegionApp extends Construct {
       priority: 2,
       auroraDatabase: props.countDatabase,
       enableApplicationSignals: true,
+      cwAgentConfigParameter: props.cwAgentConfigParameter,
     });
 
     //Transactionサービスの起動
@@ -112,6 +120,7 @@ export class SampleMultiRegionApp extends Construct {
       mainTableName: props.mainDynamoDbTableName,
       paramTable,
       enableApplicationSignals: true,
+      cwAgentConfigParameter: props.cwAgentConfigParameter,
     });
 
     //Transaction Workerサービスの起動
@@ -123,6 +132,7 @@ export class SampleMultiRegionApp extends Construct {
       balanceEndpoint: `http://${alb.loadBalancerDnsName}/balance`,
       countEndpoint: `http://${alb.loadBalancerDnsName}/count`,
       enableApplicationSignals: true,
+      cwAgentConfigParameter: props.cwAgentConfigParameter,
     });
 
     // CloudWatch Application Signals 監視とアラートの設定
