@@ -440,13 +440,17 @@ exports[`snapshot check Customer channel sample stacks 1`] = `
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "AssistantAIAgentConfigurationProviderframeworkonEventServiceRole9C4978AA",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -2775,7 +2779,7 @@ input DeleteBotInput {
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
           },
-          "S3Key": "12157b27d30ab71eb24ae65825f672ba5cc2c09dbb1703cd7adfcff3aeaca136.zip",
+          "S3Key": "c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -2829,6 +2833,7 @@ input DeleteBotInput {
           },
         ],
         "SourceObjectKeys": Any<Array>,
+        "WaitForDistributionInvalidation": true,
       },
       "Type": "Custom::CDKBucketDeployment",
       "UpdateReplacePolicy": "Delete",
@@ -3694,6 +3699,12 @@ input DeleteBotInput {
           ],
         },
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "Test",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -4310,13 +4321,17 @@ input DeleteBotInput {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ConnectCasesDomainProviderframeworkonEventServiceRole348F6EE3",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -4815,7 +4830,7 @@ input DeleteBotInput {
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
           },
-          "S3Key": "4fe0aba5e672b596d0f72505a9eec502f98d46906bb30fae2511fbdc1df4956f.zip",
+          "S3Key": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip",
         },
         "Environment": {
           "Variables": {
@@ -4834,7 +4849,7 @@ input DeleteBotInput {
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Tags": [
           {
             "Key": "Environment",
@@ -5076,7 +5091,7 @@ input DeleteBotInput {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -5168,7 +5183,7 @@ input DeleteBotInput {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -6109,13 +6124,17 @@ input DeleteBotInput {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ImportedPromptProviderframeworkonEventServiceRole1FCD1915",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -6448,13 +6467,17 @@ input DeleteBotInput {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "ImportedQueueProviderframeworkonEventServiceRole0AABAB06",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -6794,13 +6817,17 @@ input DeleteBotInput {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "InstanceStorageConfigProviderframeworkonEventServiceRole9EA1F8D0",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -7135,13 +7162,17 @@ input DeleteBotInput {
           },
         },
         "Handler": "framework.onEvent",
+        "LoggingConfig": {
+          "ApplicationLogLevel": "FATAL",
+          "LogFormat": "JSON",
+        },
         "Role": {
           "Fn::GetAtt": [
             "IntegrationAssociationProviderframeworkonEventServiceRole506DCE8E",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -7326,7 +7357,7 @@ input DeleteBotInput {
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "Environment",
@@ -7627,6 +7658,12 @@ input DeleteBotInput {
           ],
         },
         "State": "ENABLED",
+        "Tags": [
+          {
+            "Key": "Environment",
+            "Value": "Test",
+          },
+        ],
         "Targets": [
           {
             "Arn": {
@@ -8098,7 +8135,9 @@ $input.path('$.output')
             },
             {
               "ResponseTemplates": {
-                "application/json": ""error": $input.path('$.error')",
+                "application/json": "{
+          "error": "$input.path('$.error')"
+        }",
               },
               "SelectionPattern": "5\\d{2}",
               "StatusCode": "500",
@@ -8397,13 +8436,14 @@ $input.path('$.output')
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "OutboundSampleStartOutboundApiDeploymentEAC394337f8cd2a8057134a0809a5edd06b3d82f": {
+    "OutboundSampleStartOutboundApiDeploymentEAC39433769b28eb5ae7e6939ec0b64a08f537bb": {
       "DependsOn": [
         "OutboundSampleStartOutboundApiANYFFFAE841",
         "OutboundSampleStartOutboundApiStartOutboundApiModelA9A32B44",
         "OutboundSampleStartOutboundApiStartOutboundRequestValidatorFAD4AEFD",
       ],
       "Metadata": {
+        "aws:cdk:do-not-refactor": true,
         "cdk_nag": {
           "rules_to_suppress": [
             {
@@ -8454,7 +8494,7 @@ $input.path('$.output')
           "Format": "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId",
         },
         "DeploymentId": {
-          "Ref": "OutboundSampleStartOutboundApiDeploymentEAC394337f8cd2a8057134a0809a5edd06b3d82f",
+          "Ref": "OutboundSampleStartOutboundApiDeploymentEAC39433769b28eb5ae7e6939ec0b64a08f537bb",
         },
         "MethodSettings": [
           {
@@ -10938,7 +10978,7 @@ messages:
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
           },
-          "S3Key": "12157b27d30ab71eb24ae65825f672ba5cc2c09dbb1703cd7adfcff3aeaca136.zip",
+          "S3Key": "c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -10984,6 +11024,7 @@ messages:
           },
         ],
         "SourceObjectKeys": Any<Array>,
+        "WaitForDistributionInvalidation": true,
       },
       "Type": "Custom::CDKBucketDeployment",
       "UpdateReplacePolicy": "Delete",
@@ -11839,7 +11880,7 @@ exports[`snapshot check Customer channel sample stacks 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12306,7 +12347,7 @@ exports[`snapshot check Customer channel sample stacks 3`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",

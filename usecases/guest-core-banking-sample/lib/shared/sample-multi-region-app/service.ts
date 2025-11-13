@@ -12,6 +12,7 @@ import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { IAuroraGlobalCluster } from '../aurora-cluster';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { IStringParameter } from 'aws-cdk-lib/aws-ssm';
 import { addCloudWatchApplicationSignals } from './cloudwatch-application-signals';
 import { NagSuppressions } from 'cdk-nag';
 
@@ -35,6 +36,11 @@ export interface SampleAppServiceProps {
    * @default false
    */
   enableApplicationSignals?: boolean;
+
+  /**
+   * CloudWatch Agent 設定の SSM パラメータ（オプション）
+   */
+  cwAgentConfigParameter?: IStringParameter;
 }
 
 export class SampleAppService extends Construct {
@@ -101,7 +107,7 @@ export class SampleAppService extends Construct {
 
     // Application Signals を有効化（アプリケーションコンテナの前に実行）
     if (props.enableApplicationSignals) {
-      addCloudWatchApplicationSignals(taskDefinition);
+      addCloudWatchApplicationSignals(taskDefinition, props.cwAgentConfigParameter);
 
       // cdk-nag抑制: 実行ロールのデフォルトポリシーのワイルドカード権限を許可
       const executionRole = taskDefinition.executionRole;
@@ -157,13 +163,20 @@ export class SampleAppService extends Construct {
 
     // マイグレーション専用コンテナ（Application Signalsなし）
     if (migrationTaskDefinition != null) {
+      // マイグレーションタスク用の環境変数（Application Signalsの環境変数を除外）
+      const migrationEnvironment = {
+        MAIN_TABLE_NAME: mainTableName ?? '',
+        PARAM_TABLE_NAME: paramTable?.tableName ?? '',
+        DATABASE_HOST: auroraDatabase?.host ?? '',
+      };
+
       migrationTaskDefinition.addContainer('EcsApp', {
         image: containerImage,
         cpu: 1024,
         memoryReservationMiB: 2048,
         memoryLimitMiB: 2048,
         essential: true,
-        environment: containerEnvironment,
+        environment: migrationEnvironment,
         logging: ecs.LogDriver.awsLogs({
           streamPrefix: 'BLEA-Migration-',
         }),

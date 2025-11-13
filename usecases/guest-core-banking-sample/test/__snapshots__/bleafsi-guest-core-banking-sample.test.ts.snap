@@ -101,22 +101,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
       "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "SampleMultiRegionAppBalanceTaskCwAgentConfigParameterD8E57378": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "SampleMultiRegionAppCountTaskCwAgentConfigParameter4DE954CF": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "SampleMultiRegionAppTransactionTaskCwAgentConfigParameter78C5D1CB": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "SampleMultiRegionAppTransactionWorkerTaskCwAgentConfigParameter827C8A14": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
   },
   "Resources": {
     "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
@@ -126,7 +110,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "4cd2f2411231aa073e609dc99a49b5c5e974252bf9abf0f9350d237d17cce8be.zip",
+          "S3Key": "8d5e97812d0036272ba1fd5bb8772ff51f4712e58c75507e4a0db242bf680f1d.zip",
         },
         "Handler": "index.handler",
         "Role": {
@@ -135,7 +119,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 120,
       },
       "Type": "AWS::Lambda::Function",
@@ -234,6 +218,18 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
         },
       },
       "Type": "AWS::KMS::Alias",
+    },
+    "ApplicationSignalsConfigParameter20A797A6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "Description": "CloudWatch Agent configuration for Application Signals in Core Banking Sample (test, ap-northeast-1)",
+        "Name": "/ecs/cloudwatch-agent/application-signals-config",
+        "Tier": "Standard",
+        "Type": "String",
+        "Value": "{"traces":{"traces_collected":{"application_signals":{}}},"logs":{"metrics_collected":{"application_signals":{}}}}",
+      },
+      "Type": "AWS::SSM::Parameter",
+      "UpdateReplacePolicy": "Delete",
     },
     "BLEAFSICoreBankingprimaryDBAuroraPgAuroraClusterSecret7B31D2F13fdaad7efa858a3daf9490cf0a702aeb": {
       "DeletionPolicy": "Delete",
@@ -704,7 +700,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "4fe0aba5e672b596d0f72505a9eec502f98d46906bb30fae2511fbdc1df4956f.zip",
+          "S3Key": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip",
         },
         "Environment": {
           "Variables": {
@@ -723,7 +719,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "python3.11",
+        "Runtime": "python3.13",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -863,7 +859,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -964,7 +960,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -1022,7 +1018,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
       "DeletionPolicy": "Snapshot",
       "Properties": {
         "CopyTagsToSnapshot": true,
-        "DBClusterParameterGroupName": "default.aurora-postgresql11",
+        "DBClusterParameterGroupName": "default.aurora-postgresql16",
         "DBSubnetGroupName": {
           "Ref": "DBAuroraPgAuroraClusterSubnets4FFFB644",
         },
@@ -1031,7 +1027,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
           "postgresql",
         ],
         "Engine": "aurora-postgresql",
-        "EngineVersion": "11.9",
+        "EngineVersion": "16.6",
         "KmsKeyId": {
           "Fn::GetAtt": [
             "AppKey2AF25043",
@@ -1077,7 +1073,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
         "DBClusterIdentifier": {
           "Ref": "DBAuroraPgAuroraCluster654F0C65",
         },
-        "DBInstanceClass": "db.r6g.large",
+        "DBInstanceClass": "db.r7g.large",
         "DBInstanceIdentifier": "instance1",
         "DBSubnetGroupName": {
           "Ref": "DBAuroraPgAuroraClusterSubnets4FFFB644",
@@ -1108,7 +1104,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
         "DBClusterIdentifier": {
           "Ref": "DBAuroraPgAuroraCluster654F0C65",
         },
-        "DBInstanceClass": "db.r6g.large",
+        "DBInstanceClass": "db.r7g.large",
         "DBInstanceIdentifier": "instance2",
         "DBSubnetGroupName": {
           "Ref": "DBAuroraPgAuroraClusterSubnets4FFFB644",
@@ -2395,7 +2391,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -2938,7 +2934,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
       "Properties": {
         "Content": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-1",
-          "S3Key": "12157b27d30ab71eb24ae65825f672ba5cc2c09dbb1703cd7adfcff3aeaca136.zip",
+          "S3Key": "c49d356cac773d491c5f7ac148995a1181498a8e289429f8612a7f7e3814f535.zip",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -2965,6 +2961,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 1`] = `
         "SourceObjectKeys": [
           "a0c01a498f7dbc84fb9293e1f4541a90dd184d7d0e4c8308188e6ee716ea1f5a.zip",
         ],
+        "WaitForDistributionInvalidation": true,
       },
       "Type": "Custom::CDKBucketDeployment",
       "UpdateReplacePolicy": "Delete",
@@ -3644,16 +3641,6 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                 ],
               },
             },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "SampleAppClientVpcVpcFlowLogsLogRoleE8BB8CD2",
-                  "Arn",
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -3684,6 +3671,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppAlb4934C8BB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "LoadBalancerAttributes": [
           {
@@ -3713,6 +3703,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
     },
     "SampleMultiRegionAppAlbListener5529D23B": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "DefaultActions": [
           {
@@ -3731,6 +3724,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
     },
     "SampleMultiRegionAppAlbListenerbalanceRule65E4B83C": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Actions": [
           {
@@ -3758,6 +3754,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "SampleMultiRegionAppAlbListenercountRuleE41D7BB5": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Actions": [
           {
@@ -3785,6 +3784,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "SampleMultiRegionAppAlbListenertransactionRuleD04F551A": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Actions": [
           {
@@ -3812,6 +3814,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "SampleMultiRegionAppAlbSecurityGroupE1B8B642": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "GroupDescription": "Automatically created Security Group for ELB BLEAFSICoreBankingprimarySampleMultiRegionAppAlbF3CD983A",
         "SecurityGroupIngress": [
@@ -3830,6 +3835,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroup",
     },
     "SampleMultiRegionAppAlbSecurityGrouptoBLEAFSICoreBankingprimarySampleMultiRegionAppBalanceFargateServiceSecurityGroup12675873300038B7AA4A": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": {
@@ -3851,6 +3859,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SampleMultiRegionAppAlbSecurityGrouptoBLEAFSICoreBankingprimarySampleMultiRegionAppCountFargateServiceSecurityGroupCBCB28B1300092064D5E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": {
@@ -3872,6 +3883,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SampleMultiRegionAppAlbSecurityGrouptoBLEAFSICoreBankingprimarySampleMultiRegionAppTransactionFargateServiceSecurityGroup09908A4E300044155975": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": {
@@ -3893,6 +3907,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringApplicationSignalsDashboardC29747DF": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "DashboardBody": {
           "Fn::Join": [
@@ -4027,6 +4044,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Dashboard",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringbalanceErrorRateAlarmDB5BB4BE": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4062,6 +4082,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringbalanceLatencyAlarmA0DBEDE7": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4097,6 +4120,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringcountErrorRateAlarm920D1EE2": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4132,6 +4158,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringcountLatencyAlarm9387A527": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4167,6 +4196,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionErrorRateAlarmEF0DFCCA": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4202,6 +4234,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionLatencyAlarmE86E4747": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4237,6 +4272,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionworkerErrorRateAlarm4059BA8D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4272,6 +4310,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionworkerLatencyAlarmEE50ACD7": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -4308,6 +4349,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppBalanceFargateServiceB3CE9C1E": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppAlbListenerbalanceRule65E4B83C",
         "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604",
         "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37",
@@ -4371,6 +4413,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppBalanceFargateServiceSecurityGroup3FD93178": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604",
         "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37",
       ],
@@ -4391,6 +4434,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppBalanceFargateServiceSecurityGroupfromBLEAFSICoreBankingprimarySampleMultiRegionAppAlbSecurityGroup1DD7615C3000CCD533CB": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604",
         "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37",
       ],
@@ -4415,6 +4459,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "SampleMultiRegionAppBalanceGroup2D002CE6": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "HealthCheckIntervalSeconds": 15,
         "HealthCheckPath": "/health",
@@ -4439,6 +4486,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "SampleMultiRegionAppBalanceMigrationTaskE0DE7B86": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -4470,50 +4520,6 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     "Endpoint.Address",
                   ],
                 },
-              },
-              {
-                "Name": "OTEL_RESOURCE_ATTRIBUTES",
-                "Value": "service.name=balance,deployment.environment=production,service.version=1.0.0",
-              },
-              {
-                "Name": "OTEL_AWS_APPLICATION_SIGNALS_ENABLED",
-                "Value": "true",
-              },
-              {
-                "Name": "OTEL_METRICS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_LOGS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_TRACES_EXPORTER",
-                "Value": "otlp",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_PROTOCOL",
-                "Value": "http/protobuf",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                "Value": "http://localhost:4316",
-              },
-              {
-                "Name": "OTEL_NODE_RESOURCE_DETECTORS",
-                "Value": "env,host,os,process",
-              },
-              {
-                "Name": "OTEL_PROPAGATORS",
-                "Value": "xray",
-              },
-              {
-                "Name": "NODE_OPTIONS",
-                "Value": "--require /otel-auto-instrumentation-node/autoinstrumentation.js",
-              },
-              {
-                "Name": "OTEL_TRACES_SAMPLER",
-                "Value": "xray",
               },
             ],
             "Essential": true,
@@ -4589,10 +4595,16 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppBalanceMigrationTaskEcsAppLogGroupA6525B5B": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppBalanceMigrationTaskExecutionRoleDefaultPolicy2A2BFC38": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -4670,6 +4682,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppBalanceMigrationTaskExecutionRoleE48450E5": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -4687,6 +4702,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppBalanceMigrationTaskTaskRole05FB2385": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -4704,6 +4722,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppBalanceTaskCD24682E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -4799,7 +4820,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-1:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -4972,10 +4996,16 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppBalanceTaskEcsAppLogGroup528CF884": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppBalanceTaskExecutionRole36D89483": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -5034,6 +5064,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppBalanceTaskExecutionRoleDefaultPolicyFD62584B": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -5072,7 +5105,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -5129,7 +5165,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -5195,6 +5234,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -5240,7 +5282,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -5258,6 +5303,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -5289,16 +5337,25 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppBalanceTaskecscwagentLogGroupC3EC8502": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppBalanceTaskinitLogGroupCC00F0E9": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCanaryArtifactsBucketD01DC908": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
@@ -5314,6 +5371,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCanaryArtifactsBucketPolicy5DEF9D6A": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Bucket": {
           "Ref": "SampleMultiRegionAppCanaryArtifactsBucketD01DC908",
@@ -5361,6 +5421,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::S3::BucketPolicy",
     },
     "SampleMultiRegionAppCanaryD0102896": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "ArtifactS3Location": {
           "Fn::Join": [
@@ -5390,7 +5453,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
             "BASE_URL": "http://api.example.com",
           },
         },
-        "RuntimeVersion": "syn-nodejs-puppeteer-7.0",
+        "RuntimeVersion": "syn-nodejs-puppeteer-9.0",
         "Schedule": {
           "DurationInSeconds": "0",
           "Expression": "rate(1 minute)",
@@ -5412,12 +5475,6 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
             {
               "Ref": "VpcProtectedSubnet2SubnetC22C3325",
             },
-            {
-              "Ref": "VpcForTgwAttachmentsSubnet1Subnet95D19052",
-            },
-            {
-              "Ref": "VpcForTgwAttachmentsSubnet2SubnetAEDBB0E8",
-            },
           ],
           "VpcId": {
             "Ref": "Vpc8378EB38",
@@ -5427,6 +5484,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::Synthetics::Canary",
     },
     "SampleMultiRegionAppCanarySecurityGroupD6177105": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "GroupDescription": "Automatic security group for Canary BLEAFSICoreBankingprimarySampleMultiRegionAppCanary38AA3963",
         "SecurityGroupEgress": [
@@ -5443,6 +5503,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroup",
     },
     "SampleMultiRegionAppCanaryServiceRoleECF5668F": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -5547,6 +5610,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCluster9D88E1C2": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "ClusterSettings": [
           {
@@ -5559,6 +5625,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppCountFargateService2EE1C613": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppAlbListenercountRuleE41D7BB5",
         "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718",
         "SampleMultiRegionAppCountTaskTaskRole45DC9375",
@@ -5622,6 +5689,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppCountFargateServiceSecurityGroup12EC9FEF": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718",
         "SampleMultiRegionAppCountTaskTaskRole45DC9375",
       ],
@@ -5642,6 +5710,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppCountFargateServiceSecurityGroupfromBLEAFSICoreBankingprimarySampleMultiRegionAppAlbSecurityGroup1DD7615C3000D52D5D86": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718",
         "SampleMultiRegionAppCountTaskTaskRole45DC9375",
       ],
@@ -5666,6 +5735,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "SampleMultiRegionAppCountGroupF35DCD9E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "HealthCheckIntervalSeconds": 15,
         "HealthCheckPath": "/health",
@@ -5690,6 +5762,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "SampleMultiRegionAppCountMigrationTask5AEF8925": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -5721,50 +5796,6 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     "Endpoint.Address",
                   ],
                 },
-              },
-              {
-                "Name": "OTEL_RESOURCE_ATTRIBUTES",
-                "Value": "service.name=count,deployment.environment=production,service.version=1.0.0",
-              },
-              {
-                "Name": "OTEL_AWS_APPLICATION_SIGNALS_ENABLED",
-                "Value": "true",
-              },
-              {
-                "Name": "OTEL_METRICS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_LOGS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_TRACES_EXPORTER",
-                "Value": "otlp",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_PROTOCOL",
-                "Value": "http/protobuf",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                "Value": "http://localhost:4316",
-              },
-              {
-                "Name": "OTEL_NODE_RESOURCE_DETECTORS",
-                "Value": "env,host,os,process",
-              },
-              {
-                "Name": "OTEL_PROPAGATORS",
-                "Value": "xray",
-              },
-              {
-                "Name": "NODE_OPTIONS",
-                "Value": "--require /otel-auto-instrumentation-node/autoinstrumentation.js",
-              },
-              {
-                "Name": "OTEL_TRACES_SAMPLER",
-                "Value": "xray",
               },
             ],
             "Essential": true,
@@ -5840,10 +5871,16 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppCountMigrationTaskEcsAppLogGroupD113B88D": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCountMigrationTaskExecutionRoleB359099F": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -5861,6 +5898,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountMigrationTaskExecutionRoleDefaultPolicy96368832": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -5938,6 +5978,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppCountMigrationTaskTaskRole588A52BB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -5955,6 +5998,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountTask9E5764AB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -6050,7 +6096,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-1:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -6223,10 +6272,16 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppCountTaskEcsAppLogGroupF40366CD": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCountTaskExecutionRoleA2265BAB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -6285,6 +6340,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountTaskExecutionRoleDefaultPolicyFF11097E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -6323,7 +6381,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -6380,7 +6441,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -6446,6 +6510,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppCountTaskTaskRole45DC9375": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -6476,6 +6543,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -6521,7 +6591,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -6540,15 +6613,24 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppCountTaskecscwagentLogGroup90463DDD": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCountTaskinitLogGroupB759B4B5": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppMyRecordSet4189E06D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -6582,6 +6664,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppParamTable7082CE0D": {
       "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AttributeDefinitions": [
           {
@@ -6602,6 +6687,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionFargateServiceC2F48BC5": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppAlbListenertransactionRuleD04F551A",
         "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C",
         "SampleMultiRegionAppTransactionTaskTaskRole209E6E33",
@@ -6665,6 +6751,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionFargateServiceSecurityGroupAAC95742": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C",
         "SampleMultiRegionAppTransactionTaskTaskRole209E6E33",
       ],
@@ -6685,6 +6772,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionFargateServiceSecurityGroupfromBLEAFSICoreBankingprimarySampleMultiRegionAppAlbSecurityGroup1DD7615C30004DA9333E": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C",
         "SampleMultiRegionAppTransactionTaskTaskRole209E6E33",
       ],
@@ -6709,6 +6797,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "SampleMultiRegionAppTransactionGroupBBCBB2BD": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "HealthCheckIntervalSeconds": 15,
         "HealthCheckPath": "/health",
@@ -6733,6 +6824,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "SampleMultiRegionAppTransactionTaskA16B11F7": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -6828,7 +6922,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-1:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -6983,10 +7080,16 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionTaskEcsAppLogGroupDC46D677": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionTaskExecutionRole3D527536": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7045,6 +7148,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionTaskExecutionRoleDefaultPolicy95A5AB7D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7083,7 +7189,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -7140,7 +7249,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -7196,6 +7308,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppTransactionTaskTaskRole209E6E33": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7226,6 +7341,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -7271,7 +7389,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -7389,16 +7510,23 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionTaskecscwagentLogGroup62A9DCC5": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionTaskinitLogGroup76BB1229": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionWorkerFargateServiceCAD6D2BF": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleDefaultPolicy44090D01",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleCC299E7B",
       ],
@@ -7452,6 +7580,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionWorkerFargateServiceSecurityGroup8D963150": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleDefaultPolicy44090D01",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleCC299E7B",
       ],
@@ -7471,6 +7600,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::EC2::SecurityGroup",
     },
     "SampleMultiRegionAppTransactionWorkerTaskB2B4F976": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7566,7 +7698,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-1:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -7751,10 +7886,16 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionWorkerTaskEcsAppLogGroup275E0976": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionWorkerTaskExecutionRole0464601D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7813,6 +7954,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionWorkerTaskExecutionRoleDefaultPolicy3B01D851": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7851,7 +7995,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -7908,7 +8055,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -7964,6 +8114,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppTransactionWorkerTaskTaskRoleCC299E7B": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -7994,6 +8147,9 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionWorkerTaskTaskRoleDefaultPolicy44090D01": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -8039,7 +8195,10 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-1:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-1:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -8157,11 +8316,17 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
     },
     "SampleMultiRegionAppTransactionWorkerTaskecscwagentLogGroupE3353C45": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionWorkerTaskinitLogGroup13747103": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
@@ -8172,7 +8337,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
       ],
       "Properties": {
         "Code": {
-          "ZipFile": ""use strict";var i=Object.defineProperty;var l=Object.getOwnPropertyDescriptor;var d=Object.getOwnPropertyNames;var p=Object.prototype.hasOwnProperty;var m=(e,s)=>{for(var r in s)i(e,r,{get:s[r],enumerable:!0})},u=(e,s,r,a)=>{if(s&&typeof s=="object"||typeof s=="function")for(let t of d(s))!p.call(e,t)&&t!==r&&i(e,t,{get:()=>s[t],enumerable:!(a=l(s,t))||a.enumerable});return e};var S=e=>u(i({},"__esModule",{value:!0}),e);var y={};m(y,{handler:()=>R});module.exports=S(y);var o=require("@aws-sdk/client-iam"),n=require("timers/promises"),g=new o.IAMClient({}),R=async(e,s)=>{try{switch(e.RequestType){case"Create":console.log(\`trying to create a service linked role for \${e.ResourceProperties.awsServiceName}\`);let r=new o.CreateServiceLinkedRoleCommand({AWSServiceName:e.ResourceProperties.awsServiceName,Description:e.ResourceProperties.description,CustomSuffix:e.ResourceProperties.customSuffix});await g.send(r),console.log("the service linked role created successfully, now waiting for IAM propagation"),await(0,n.setTimeout)(e.ResourceProperties.waitTimeSeconds*1e3);break;case"Update":break;case"Delete":break}await c("SUCCESS",e,s)}catch(r){r instanceof o.InvalidInputException?(console.log(\`The service linked role seems to already exist, skipping the creation... \${r.message}\`),await c("SUCCESS",e,s)):await c("FAILED",e,s,r.message)}},c=async(e,s,r,a)=>{let t=JSON.stringify({Status:e,Reason:a??"See the details in CloudWatch Log Stream: "+r.logStreamName,PhysicalResourceId:r.logStreamName,StackId:s.StackId,RequestId:s.RequestId,LogicalResourceId:s.LogicalResourceId,NoEcho:!1,Data:{}});await(await fetch(s.ResponseURL,{method:"PUT",body:t,headers:{"Content-Type":"","Content-Length":t.length.toString()}})).text()};0&&(module.exports={handler});
+          "ZipFile": ""use strict";var i=Object.defineProperty;var l=Object.getOwnPropertyDescriptor;var u=Object.getOwnPropertyNames;var m=Object.prototype.hasOwnProperty;var S=(e,s)=>{for(var r in s)i(e,r,{get:s[r],enumerable:!0})},R=(e,s,r,a)=>{if(s&&typeof s=="object"||typeof s=="function")for(let t of u(s))!m.call(e,t)&&t!==r&&i(e,t,{get:()=>s[t],enumerable:!(a=l(s,t))||a.enumerable});return e};var g=e=>R(i({},"__esModule",{value:!0}),e);var h={};S(h,{handler:()=>f});module.exports=g(h);var o=require("@aws-sdk/client-iam"),p=require("timers/promises"),y=new o.IAMClient({}),f=async(e,s)=>{try{switch(e.RequestType){case"Create":case"Update":console.log(\`trying to create a service linked role for \${e.ResourceProperties.awsServiceName}\`);try{let r=new o.CreateServiceLinkedRoleCommand({AWSServiceName:e.ResourceProperties.awsServiceName,Description:e.ResourceProperties.description,CustomSuffix:e.ResourceProperties.customSuffix});await y.send(r),console.log("the service linked role created successfully, now waiting for IAM propagation"),await(0,p.setTimeout)(e.ResourceProperties.waitTimeSeconds*1e3)}catch(r){if(r instanceof o.InvalidInputException){console.log(\`The service linked role seems to already exist, skipping the creation... \${r.message}\`);break}else throw r}break;case"Delete":break}await n("SUCCESS",e,s)}catch(r){await n("FAILED",e,s,r.message)}},n=async(e,s,r,a)=>{let t=s.ResourceProperties,d=\`\${t.awsServiceName}-\${t.customSuffix??""}\`,c=JSON.stringify({Status:e,Reason:(a??"")+" See the details in CloudWatch Log Stream: "+r.logStreamName,PhysicalResourceId:d,StackId:s.StackId,RequestId:s.RequestId,LogicalResourceId:s.LogicalResourceId,NoEcho:!1,Data:{}});await(await fetch(s.ResponseURL,{method:"PUT",body:c,headers:{"Content-Type":"","Content-Length":c.length.toString()}})).text()};0&&(module.exports={handler});
 ",
         },
         "Handler": "index.handler",
@@ -8183,7 +8348,7 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
@@ -9587,16 +9752,6 @@ sudo -u ec2-user bash -c "docker run --name client -d --restart unless-stopped -
                 ],
               },
             },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "VpcVpcFlowLogsLogRoleED2BD382",
-                  "Arn",
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -10009,22 +10164,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "SampleMultiRegionAppBalanceTaskCwAgentConfigParameterD8E57378": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "SampleMultiRegionAppCountTaskCwAgentConfigParameter4DE954CF": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "SampleMultiRegionAppTransactionTaskCwAgentConfigParameter78C5D1CB": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "SampleMultiRegionAppTransactionWorkerTaskCwAgentConfigParameter827C8A14": {
-      "Default": "/ecs/cloudwatch-agent/application-signals-config",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
   },
   "Resources": {
     "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
@@ -10034,7 +10173,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-ap-northeast-3",
-          "S3Key": "4cd2f2411231aa073e609dc99a49b5c5e974252bf9abf0f9350d237d17cce8be.zip",
+          "S3Key": "8d5e97812d0036272ba1fd5bb8772ff51f4712e58c75507e4a0db242bf680f1d.zip",
         },
         "Handler": "index.handler",
         "MemorySize": 256,
@@ -10044,7 +10183,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 60,
       },
       "Type": "AWS::Lambda::Function",
@@ -10143,6 +10282,18 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
         },
       },
       "Type": "AWS::KMS::Alias",
+    },
+    "ApplicationSignalsConfigParameter20A797A6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "Description": "CloudWatch Agent configuration for Application Signals in Core Banking Sample (test, ap-northeast-3)",
+        "Name": "/ecs/cloudwatch-agent/application-signals-config",
+        "Tier": "Standard",
+        "Type": "String",
+        "Value": "{"traces":{"traces_collected":{"application_signals":{}}},"logs":{"metrics_collected":{"application_signals":{}}}}",
+      },
+      "Type": "AWS::SSM::Parameter",
+      "UpdateReplacePolicy": "Delete",
     },
     "AssociateVpcWithHostedZoneRoute53AssociateVpc15E9B44F": {
       "DeletionPolicy": "Delete",
@@ -10600,7 +10751,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -10674,7 +10825,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -10765,7 +10916,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "DeletionPolicy": "Snapshot",
       "Properties": {
         "CopyTagsToSnapshot": true,
-        "DBClusterParameterGroupName": "default.aurora-postgresql11",
+        "DBClusterParameterGroupName": "default.aurora-postgresql16",
         "DBSubnetGroupName": {
           "Ref": "DBAuroraPgAuroraClusterSubnets4FFFB644",
         },
@@ -10773,7 +10924,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
           "postgresql",
         ],
         "Engine": "aurora-postgresql",
-        "EngineVersion": "11.9",
+        "EngineVersion": "16.6",
         "GlobalClusterIdentifier": "core-banking-global-db",
         "KmsKeyId": {
           "Fn::GetAtt": [
@@ -10807,7 +10958,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
         "DBClusterIdentifier": {
           "Ref": "DBAuroraPgAuroraCluster654F0C65",
         },
-        "DBInstanceClass": "db.r5.large",
+        "DBInstanceClass": "db.r7g.large",
         "DBInstanceIdentifier": "instance1",
         "DBSubnetGroupName": {
           "Ref": "DBAuroraPgAuroraClusterSubnets4FFFB644",
@@ -10838,7 +10989,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
         "DBClusterIdentifier": {
           "Ref": "DBAuroraPgAuroraCluster654F0C65",
         },
-        "DBInstanceClass": "db.r5.large",
+        "DBInstanceClass": "db.r7g.large",
         "DBInstanceIdentifier": "instance2",
         "DBSubnetGroupName": {
           "Ref": "DBAuroraPgAuroraClusterSubnets4FFFB644",
@@ -12048,7 +12199,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -12162,6 +12313,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::SNS::TopicPolicy",
     },
     "SampleMultiRegionAppAlb4934C8BB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "LoadBalancerAttributes": [
           {
@@ -12191,6 +12345,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
     },
     "SampleMultiRegionAppAlbListener5529D23B": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "DefaultActions": [
           {
@@ -12209,6 +12366,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
     },
     "SampleMultiRegionAppAlbListenerbalanceRule65E4B83C": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Actions": [
           {
@@ -12236,6 +12396,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "SampleMultiRegionAppAlbListenercountRuleE41D7BB5": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Actions": [
           {
@@ -12263,6 +12426,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "SampleMultiRegionAppAlbListenertransactionRuleD04F551A": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Actions": [
           {
@@ -12290,6 +12456,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
     },
     "SampleMultiRegionAppAlbSecurityGroupE1B8B642": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "GroupDescription": "Automatically created Security Group for ELB BLEAFSICoreBankingsecondarySampleMultiRegionAppAlbF5865706",
         "SecurityGroupIngress": [
@@ -12308,6 +12477,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroup",
     },
     "SampleMultiRegionAppAlbSecurityGrouptoBLEAFSICoreBankingsecondarySampleMultiRegionAppBalanceFargateServiceSecurityGroup0A66A186300096EC762C": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": {
@@ -12329,6 +12501,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SampleMultiRegionAppAlbSecurityGrouptoBLEAFSICoreBankingsecondarySampleMultiRegionAppCountFargateServiceSecurityGroup63DD71AF300064280800": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": {
@@ -12350,6 +12525,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SampleMultiRegionAppAlbSecurityGrouptoBLEAFSICoreBankingsecondarySampleMultiRegionAppTransactionFargateServiceSecurityGroup95F3D9103000A130DF59": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Description": "Load balancer to target",
         "DestinationSecurityGroupId": {
@@ -12371,6 +12549,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroupEgress",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringApplicationSignalsDashboardC29747DF": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "DashboardBody": {
           "Fn::Join": [
@@ -12505,6 +12686,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Dashboard",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringbalanceErrorRateAlarmDB5BB4BE": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12540,6 +12724,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringbalanceLatencyAlarmA0DBEDE7": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12575,6 +12762,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringcountErrorRateAlarm920D1EE2": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12610,6 +12800,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringcountLatencyAlarm9387A527": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12645,6 +12838,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionErrorRateAlarmEF0DFCCA": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12680,6 +12876,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionLatencyAlarmE86E4747": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12715,6 +12914,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionworkerErrorRateAlarm4059BA8D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12750,6 +12952,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
     "SampleMultiRegionAppApplicationSignalsMonitoringtransactionworkerLatencyAlarmEE50ACD7": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AlarmActions": [
           {
@@ -12786,6 +12991,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppBalanceFargateServiceB3CE9C1E": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppAlbListenerbalanceRule65E4B83C",
         "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604",
         "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37",
@@ -12849,6 +13055,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppBalanceFargateServiceSecurityGroup3FD93178": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604",
         "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37",
       ],
@@ -12869,6 +13076,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppBalanceFargateServiceSecurityGroupfromBLEAFSICoreBankingsecondarySampleMultiRegionAppAlbSecurityGroup550DBC73300093CCBB3A": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604",
         "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37",
       ],
@@ -12893,6 +13101,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "SampleMultiRegionAppBalanceGroup2D002CE6": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "HealthCheckIntervalSeconds": 15,
         "HealthCheckPath": "/health",
@@ -12917,6 +13128,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "SampleMultiRegionAppBalanceMigrationTaskE0DE7B86": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -12948,50 +13162,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     "Endpoint.Address",
                   ],
                 },
-              },
-              {
-                "Name": "OTEL_RESOURCE_ATTRIBUTES",
-                "Value": "service.name=balance,deployment.environment=production,service.version=1.0.0",
-              },
-              {
-                "Name": "OTEL_AWS_APPLICATION_SIGNALS_ENABLED",
-                "Value": "true",
-              },
-              {
-                "Name": "OTEL_METRICS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_LOGS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_TRACES_EXPORTER",
-                "Value": "otlp",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_PROTOCOL",
-                "Value": "http/protobuf",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                "Value": "http://localhost:4316",
-              },
-              {
-                "Name": "OTEL_NODE_RESOURCE_DETECTORS",
-                "Value": "env,host,os,process",
-              },
-              {
-                "Name": "OTEL_PROPAGATORS",
-                "Value": "xray",
-              },
-              {
-                "Name": "NODE_OPTIONS",
-                "Value": "--require /otel-auto-instrumentation-node/autoinstrumentation.js",
-              },
-              {
-                "Name": "OTEL_TRACES_SAMPLER",
-                "Value": "xray",
               },
             ],
             "Essential": true,
@@ -13189,10 +13359,16 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppBalanceMigrationTaskEcsAppLogGroupA6525B5B": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppBalanceMigrationTaskExecutionRoleDefaultPolicy2A2BFC38": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -13339,6 +13515,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppBalanceMigrationTaskExecutionRoleE48450E5": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -13356,6 +13535,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppBalanceMigrationTaskTaskRole05FB2385": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -13373,6 +13555,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppBalanceTaskCD24682E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -13468,7 +13653,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-3:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -13763,10 +13951,16 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppBalanceTaskEcsAppLogGroup528CF884": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppBalanceTaskExecutionRole36D89483": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -13825,6 +14019,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppBalanceTaskExecutionRoleDefaultPolicyFD62584B": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -13863,7 +14060,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -13920,7 +14120,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -14055,6 +14258,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppBalanceTaskTaskRoleDefaultPolicyE1DC9604": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -14100,7 +14306,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -14118,6 +14327,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppBalanceTaskTaskRoleEBBC5F37": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -14149,16 +14361,25 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppBalanceTaskecscwagentLogGroupC3EC8502": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppBalanceTaskinitLogGroupCC00F0E9": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCanaryArtifactsBucketD01DC908": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
@@ -14174,6 +14395,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCanaryArtifactsBucketPolicy5DEF9D6A": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "Bucket": {
           "Ref": "SampleMultiRegionAppCanaryArtifactsBucketD01DC908",
@@ -14221,6 +14445,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::S3::BucketPolicy",
     },
     "SampleMultiRegionAppCanaryD0102896": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "ArtifactS3Location": {
           "Fn::Join": [
@@ -14250,7 +14477,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
             "BASE_URL": "http://api.example.com",
           },
         },
-        "RuntimeVersion": "syn-nodejs-puppeteer-7.0",
+        "RuntimeVersion": "syn-nodejs-puppeteer-9.0",
         "Schedule": {
           "DurationInSeconds": "0",
           "Expression": "rate(1 minute)",
@@ -14272,12 +14499,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
             {
               "Ref": "VpcProtectedSubnet2SubnetC22C3325",
             },
-            {
-              "Ref": "VpcForTgwAttachmentsSubnet1Subnet95D19052",
-            },
-            {
-              "Ref": "VpcForTgwAttachmentsSubnet2SubnetAEDBB0E8",
-            },
           ],
           "VpcId": {
             "Ref": "Vpc8378EB38",
@@ -14287,6 +14508,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::Synthetics::Canary",
     },
     "SampleMultiRegionAppCanarySecurityGroupD6177105": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "GroupDescription": "Automatic security group for Canary BLEAFSICoreBankingsecondarySampleMultiRegionAppCanary1D14AD94",
         "SecurityGroupEgress": [
@@ -14303,6 +14527,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroup",
     },
     "SampleMultiRegionAppCanaryServiceRoleECF5668F": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -14407,6 +14634,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCluster9D88E1C2": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "ClusterSettings": [
           {
@@ -14419,6 +14649,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppCountFargateService2EE1C613": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppAlbListenercountRuleE41D7BB5",
         "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718",
         "SampleMultiRegionAppCountTaskTaskRole45DC9375",
@@ -14482,6 +14713,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppCountFargateServiceSecurityGroup12EC9FEF": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718",
         "SampleMultiRegionAppCountTaskTaskRole45DC9375",
       ],
@@ -14502,6 +14734,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppCountFargateServiceSecurityGroupfromBLEAFSICoreBankingsecondarySampleMultiRegionAppAlbSecurityGroup550DBC733000E3B3303A": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718",
         "SampleMultiRegionAppCountTaskTaskRole45DC9375",
       ],
@@ -14526,6 +14759,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "SampleMultiRegionAppCountGroupF35DCD9E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "HealthCheckIntervalSeconds": 15,
         "HealthCheckPath": "/health",
@@ -14550,6 +14786,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "SampleMultiRegionAppCountMigrationTask5AEF8925": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -14581,50 +14820,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     "Endpoint.Address",
                   ],
                 },
-              },
-              {
-                "Name": "OTEL_RESOURCE_ATTRIBUTES",
-                "Value": "service.name=count,deployment.environment=production,service.version=1.0.0",
-              },
-              {
-                "Name": "OTEL_AWS_APPLICATION_SIGNALS_ENABLED",
-                "Value": "true",
-              },
-              {
-                "Name": "OTEL_METRICS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_LOGS_EXPORTER",
-                "Value": "none",
-              },
-              {
-                "Name": "OTEL_TRACES_EXPORTER",
-                "Value": "otlp",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_PROTOCOL",
-                "Value": "http/protobuf",
-              },
-              {
-                "Name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                "Value": "http://localhost:4316",
-              },
-              {
-                "Name": "OTEL_NODE_RESOURCE_DETECTORS",
-                "Value": "env,host,os,process",
-              },
-              {
-                "Name": "OTEL_PROPAGATORS",
-                "Value": "xray",
-              },
-              {
-                "Name": "NODE_OPTIONS",
-                "Value": "--require /otel-auto-instrumentation-node/autoinstrumentation.js",
-              },
-              {
-                "Name": "OTEL_TRACES_SAMPLER",
-                "Value": "xray",
               },
             ],
             "Essential": true,
@@ -14822,10 +15017,16 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppCountMigrationTaskEcsAppLogGroupD113B88D": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCountMigrationTaskExecutionRoleB359099F": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -14843,6 +15044,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountMigrationTaskExecutionRoleDefaultPolicy96368832": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -14989,6 +15193,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppCountMigrationTaskTaskRole588A52BB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -15006,6 +15213,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountTask9E5764AB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -15101,7 +15311,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-3:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -15396,10 +15609,16 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppCountTaskEcsAppLogGroupF40366CD": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCountTaskExecutionRoleA2265BAB": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -15458,6 +15677,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountTaskExecutionRoleDefaultPolicyFF11097E": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -15496,7 +15718,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -15553,7 +15778,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -15688,6 +15916,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppCountTaskTaskRole45DC9375": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -15718,6 +15949,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppCountTaskTaskRoleDefaultPolicy49641718": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -15763,7 +15997,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -15782,15 +16019,24 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppCountTaskecscwagentLogGroup90463DDD": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppCountTaskinitLogGroupB759B4B5": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppMyRecordSet4189E06D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -15827,6 +16073,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppParamTable7082CE0D": {
       "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "AttributeDefinitions": [
           {
@@ -15847,6 +16096,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionFargateServiceC2F48BC5": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppAlbListenertransactionRuleD04F551A",
         "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C",
         "SampleMultiRegionAppTransactionTaskTaskRole209E6E33",
@@ -15910,6 +16160,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionFargateServiceSecurityGroupAAC95742": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C",
         "SampleMultiRegionAppTransactionTaskTaskRole209E6E33",
       ],
@@ -15930,6 +16181,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionFargateServiceSecurityGroupfromBLEAFSICoreBankingsecondarySampleMultiRegionAppAlbSecurityGroup550DBC7330004965F1F7": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C",
         "SampleMultiRegionAppTransactionTaskTaskRole209E6E33",
       ],
@@ -15954,6 +16206,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroupIngress",
     },
     "SampleMultiRegionAppTransactionGroupBBCBB2BD": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "HealthCheckIntervalSeconds": 15,
         "HealthCheckPath": "/health",
@@ -15978,6 +16233,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
     },
     "SampleMultiRegionAppTransactionTaskA16B11F7": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -16073,7 +16331,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-3:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -16228,10 +16489,16 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionTaskEcsAppLogGroupDC46D677": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionTaskExecutionRole3D527536": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -16290,6 +16557,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionTaskExecutionRoleDefaultPolicy95A5AB7D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -16328,7 +16598,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -16385,7 +16658,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -16441,6 +16717,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppTransactionTaskTaskRole209E6E33": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -16471,6 +16750,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionTaskTaskRoleDefaultPolicy89E5314C": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -16516,7 +16798,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -16634,16 +16919,23 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionTaskecscwagentLogGroup62A9DCC5": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionTaskinitLogGroup76BB1229": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionWorkerFargateServiceCAD6D2BF": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleDefaultPolicy44090D01",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleCC299E7B",
       ],
@@ -16697,6 +16989,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionWorkerFargateServiceSecurityGroup8D963150": {
       "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleDefaultPolicy44090D01",
         "SampleMultiRegionAppTransactionWorkerTaskTaskRoleCC299E7B",
       ],
@@ -16716,6 +17009,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::EC2::SecurityGroup",
     },
     "SampleMultiRegionAppTransactionWorkerTaskB2B4F976": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -16811,7 +17107,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                       {
                         "Ref": "AWS::Partition",
                       },
-                      ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                      ":ssm:ap-northeast-3:111111111111:parameter",
+                      {
+                        "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                      },
                     ],
                   ],
                 },
@@ -16996,10 +17295,16 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionWorkerTaskEcsAppLogGroup275E0976": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionWorkerTaskExecutionRole0464601D": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -17058,6 +17363,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionWorkerTaskExecutionRoleDefaultPolicy3B01D851": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -17096,7 +17404,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -17153,7 +17464,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -17209,6 +17523,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "SampleMultiRegionAppTransactionWorkerTaskTaskRoleCC299E7B": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Metadata": {
         "cdk_nag": {
           "rules_to_suppress": [
@@ -17239,6 +17556,9 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
       "Type": "AWS::IAM::Role",
     },
     "SampleMultiRegionAppTransactionWorkerTaskTaskRoleDefaultPolicy44090D01": {
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -17284,7 +17604,10 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":ssm:ap-northeast-3:111111111111:parameter/ecs/cloudwatch-agent/application-signals-config",
+                    ":ssm:ap-northeast-3:111111111111:parameter",
+                    {
+                      "Ref": "ApplicationSignalsConfigParameter20A797A6",
+                    },
                   ],
                 ],
               },
@@ -17402,11 +17725,17 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
     },
     "SampleMultiRegionAppTransactionWorkerTaskecscwagentLogGroupE3353C45": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
     "SampleMultiRegionAppTransactionWorkerTaskinitLogGroup13747103": {
       "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "ApplicationSignalsConfigParameter20A797A6",
+      ],
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Retain",
     },
@@ -18757,16 +19086,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 2`] = `
                 ],
               },
             },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "VpcVpcFlowLogsLogRoleED2BD382",
-                  "Arn",
-                ],
-              },
-            },
           ],
           "Version": "2012-10-17",
         },
@@ -19298,7 +19617,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 3`] = `
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-111111111111-us-west-2",
-          "S3Key": "4cd2f2411231aa073e609dc99a49b5c5e974252bf9abf0f9350d237d17cce8be.zip",
+          "S3Key": "8d5e97812d0036272ba1fd5bb8772ff51f4712e58c75507e4a0db242bf680f1d.zip",
         },
         "Handler": "index.handler",
         "MemorySize": 256,
@@ -19308,7 +19627,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 3`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 60,
       },
       "Type": "AWS::Lambda::Function",
@@ -19801,7 +20120,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 3`] = `
             "BASE_URL": "http://api.example.com",
           },
         },
-        "RuntimeVersion": "syn-nodejs-puppeteer-7.0",
+        "RuntimeVersion": "syn-nodejs-puppeteer-9.0",
         "Schedule": {
           "DurationInSeconds": "0",
           "Expression": "rate(1 minute)",
@@ -19822,12 +20141,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 3`] = `
             },
             {
               "Ref": "VpcProtectedSubnet2SubnetC22C3325",
-            },
-            {
-              "Ref": "VpcForTgwAttachmentsSubnet1Subnet95D19052",
-            },
-            {
-              "Ref": "VpcForTgwAttachmentsSubnet2SubnetAEDBB0E8",
             },
           ],
           "VpcId": {
@@ -20061,7 +20374,7 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 3`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -21454,16 +21767,6 @@ exports[`BLEAFSI-CoreBanking snapshot check Core banking sample Stacks 3`] = `
               "Resource": {
                 "Fn::GetAtt": [
                   "VpcVpcFlowLogsLogGroup8558C776",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": "iam:PassRole",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "VpcVpcFlowLogsLogRoleED2BD382",
                   "Arn",
                 ],
               },

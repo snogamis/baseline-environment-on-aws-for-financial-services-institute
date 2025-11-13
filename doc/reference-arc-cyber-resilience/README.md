@@ -28,14 +28,14 @@
   ![alt text](doc/reference-arc-cyber-resilience/images/README/backup-restore.png)
 
 - 具体的なバックアップ取得手順および復旧手順は以下の手順書を参照ください。
-  - [サイバーレジリエンスバックアップ手順書](doc/reference-arc-cyber-resilience/backup-procedures.md)
-  - [サイバーレジリエンス復旧手順書](doc/reference-arc-cyber-resilience/restore-procedures.md)
+  - [サイバーレジリエンスバックアップ手順書](./backup-procedures.md)
+  - [サイバーレジリエンス復旧手順書](./restore-procedures.md)
 
 ### 隔離とフォレンジックについて
 
 - サイバーイベント発生時には、影響を受けたシステムの速やかな隔離とインシデント調査のための証拠保全を実施することが重要です。また、バックアップデータを用いた復旧作業に着手する前には、バックアップの完全性を評価する必要があります。
 - 本リファレンスアーキテクチャでは、勘定系ワークロードを対象として、Amazon GuardDuty で不審なアクセスがあったことをトリガーに、Lambda 関数でネットワーク ACL を変更し、侵害されたシステムを隔離する処理を実行します。隔離が完了すると、Amazon SNS にて管理者へ通知を行います。
-  - [自動ネットワーク隔離手順書](doc/reference-arc-cyber-resilience/isolation-procedures.md)
+  - [自動ネットワーク隔離手順書](./isolation-procedures.md)
 - なお、勘定系ワークロードは Amazon ECS Fargate を用いておりコンテナホストが AWS の管理責任下にあるため調査箇所が限られていることから、フォレンジックアカウントのデプロイおよび実施手順は省略しています。フォレンジックの実装ガイドおよびソリューションは以下 AWS ドキュメントを参照ください。
   - https://docs.aws.amazon.com/ja_jp/security-ir/latest/userguide/appendix-b-incident-response-resources.html#forensic-resources
 
@@ -48,7 +48,7 @@
 - 金融庁は「金融分野におけるサイバーセキュリティに関するガイドライン」を策定し、バックアップに関する規程整備やランサムウェア攻撃への対応事項を定義しています。
   - https://www.fsa.go.jp/news/r6/sonota/20241004/18.pdf
 - 上記を受けて、FISC 安全対策基準でもサイバーレジリエンス強化に関する基準項目が新設され、本リファレンスアーキテクチャを活用した対策内容を更新しています。
-  - [FISC 安全対策基準 実務基準の対策](doc/reference-arc-core-banking/fisc-mapping-core-banking.md)
+  - [FISC 安全対策基準 実務基準の対策](https://github.com/aws-samples/baseline-environment-on-aws-for-financial-services-institute/blob/main/doc/reference-arc-core-banking/fisc-mapping-core-banking.md)
 
 ### ベストプラクティス・ホワイトペーパー
 

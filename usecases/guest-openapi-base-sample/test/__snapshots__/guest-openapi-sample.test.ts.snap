@@ -151,6 +151,9 @@ exports[`BLEA-FSI snapshot check OpenAPI sample Stacks 1`] = `
         "ApiGatewaysampleapiproxyGET8086C489",
         "ApiGatewaysampleapiproxy9A12D52B",
       ],
+      "Metadata": {
+        "aws:cdk:do-not-refactor": true,
+      },
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
         "RestApiId": {

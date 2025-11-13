@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.2] - 2025-11-12
+
+### Changed
+- 新ワークロード 生成AIの提供
+  - リファレンスアーキテクチャの提供
+  - 業務ユースケースの提供
+- CDKバージョンアップ対応
+- 既存ワークロードの軽微な修正
+
 ## [1.6.1] - 2025-10-31
 
 ### Changed

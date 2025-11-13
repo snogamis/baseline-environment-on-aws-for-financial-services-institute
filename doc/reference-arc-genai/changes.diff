@@ -1,0 +1,1434 @@
+diff --git a/packages/cdk/lib/agent-core-stack.ts b/packages/cdk/lib/agent-core-stack.ts
+index 86c1056..b7bde2b 100644
+--- a/packages/cdk/lib/agent-core-stack.ts
++++ b/packages/cdk/lib/agent-core-stack.ts
+@@ -4,6 +4,8 @@ import { GenericAgentCore } from './construct/generic-agent-core';
+ import { ProcessedStackInput } from './stack-input';
+ import { BucketInfo } from 'generative-ai-use-cases';
+ 
++import { KmsKey } from './construct/bleafsi-kms-key';
++
+ export interface AgentCoreStackProps extends StackProps {
+   readonly params: ProcessedStackInput;
+ }
+@@ -16,10 +18,15 @@ export class AgentCoreStack extends Stack {
+ 
+     const params = props.params;
+ 
++    const kmsKey = new KmsKey(this, 's3Encryption-AgentCore', {
++      description: 'this key is used for encryption of S3 in AgentCore ts',
++    });
++
+     // Deploy Generic AgentCore Runtime if enabled
+     if (params.createGenericAgentCoreRuntime) {
+       this.genericAgentCore = new GenericAgentCore(this, 'GenericAgentCore', {
+         env: params.env,
++        kmsKey: kmsKey,
+       });
+ 
+       // Output the runtime ARN for cross-stack reference
+diff --git a/packages/cdk/lib/construct/api.ts b/packages/cdk/lib/construct/api.ts
+index 50ee7a4..e8f9e4d 100644
+--- a/packages/cdk/lib/construct/api.ts
++++ b/packages/cdk/lib/construct/api.ts
+@@ -41,6 +41,8 @@ import {
+   ISecurityGroup,
+ } from 'aws-cdk-lib/aws-ec2';
+ 
++import { KmsKey } from './bleafsi-kms-key';
++
+ export interface BackendApiProps {
+   // Context Params
+   readonly modelRegion: string;
+@@ -48,6 +50,7 @@ export interface BackendApiProps {
+   readonly imageGenerationModelIds: ModelConfiguration[];
+   readonly videoGenerationModelIds: ModelConfiguration[];
+   readonly videoBucketRegionMap: Record<string, string>;
++  readonly videoTmpBucketKmsKeyArnMap: Record<string, string>;
+   readonly endpointNames: ModelConfiguration[];
+   readonly queryDecompositionEnabled: boolean;
+   readonly rerankingModelId?: string | null;
+@@ -63,10 +66,14 @@ export interface BackendApiProps {
+   readonly userPoolClient: UserPoolClient;
+   readonly table: Table;
+   readonly statsTable: Table;
++  readonly dynamoDBKmsKey: KmsKey;
+   readonly knowledgeBaseId?: string;
++  readonly knowledgeBaseS3KmsArn?: string;
+   readonly agents?: Agent[];
+   readonly guardrailIdentify?: string;
+   readonly guardrailVersion?: string;
++  readonly guardrailKmsKeyArn?: string;
++  readonly s3KmsKey: KmsKey;
+ 
+   // Closed network
+   readonly vpc?: IVpc;
+@@ -109,6 +116,10 @@ export class Api extends Construct {
+       vpc,
+       securityGroups,
+       apiGatewayVpcEndpoint,
++      guardrailKmsKeyArn,
++      dynamoDBKmsKey,
++      knowledgeBaseS3KmsArn,
++      s3KmsKey,
+     } = props;
+     const agents: Agent[] = [...(props.agents ?? []), ...props.customAgents];
+ 
+@@ -159,7 +170,8 @@ export class Api extends Construct {
+ 
+     // S3 (File Bucket)
+     const fileBucket = new Bucket(this, 'FileBucket', {
+-      encryption: BucketEncryption.S3_MANAGED,
++      encryption: BucketEncryption.KMS,
++      encryptionKey: s3KmsKey.key,
+       removalPolicy: RemovalPolicy.DESTROY,
+       autoDeleteObjects: true,
+       enforceSSL: true,
+@@ -495,6 +507,21 @@ export class Api extends Construct {
+               ipv6: props.allowedIpV6AddressRanges,
+             }
+           );
++          if (bucket.encryptionKey) {
++            getFileDownloadSignedUrlFunction.role?.addToPrincipalPolicy(
++              new PolicyStatement({
++                effect: Effect.ALLOW,
++                actions: [
++                  'kms:Encrypt*',
++                  'kms:Decrypt*',
++                  'kms:ReEncrypt*',
++                  'kms:GenerateDataKey*',
++                  'kms:Describe*',
++                ],
++                resources: [bucket.encryptionKey?.keyArn],
++              })
++            );
++          }
+         });
+       }
+     }
+@@ -1108,6 +1135,125 @@ export class Api extends Construct {
+       commonAuthorizerProps
+     );
+ 
++    // If Guardrail KMS exists, grant permission
++    if (guardrailKmsKeyArn) {
++      const kmsPolicy = new PolicyStatement({
++        effect: Effect.ALLOW,
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: [guardrailKmsKeyArn],
++      });
++      predictFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      predictStreamFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      predictTitleFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    }
++
++    // If dynamoDB KMS exists, grant permission
++    if (dynamoDBKmsKey) {
++      const kmsPolicy = new PolicyStatement({
++        effect: Effect.ALLOW,
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: [dynamoDBKmsKey.key.keyArn],
++      });
++      predictTitleFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      generateVideoFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      listVideoJobs.role?.addToPrincipalPolicy(kmsPolicy);
++      copyVideoJob.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteVideoJob.role?.addToPrincipalPolicy(kmsPolicy);
++      createChatFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteChatFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      createMessagesFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      updateChatTitleFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      listChatsFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      findChatbyIdFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      listMessagesFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      updateFeedbackFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      createShareId.role?.addToPrincipalPolicy(kmsPolicy);
++      getSharedChat.role?.addToPrincipalPolicy(kmsPolicy);
++      findShareId.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteShareId.role?.addToPrincipalPolicy(kmsPolicy);
++      listSystemContextsFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      createSystemContextFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      updateSystemContextTitleFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteSystemContextFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      getTokenUsageFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    }
++
++    // If S3 File KMS exists, grant permission
++    if (s3KmsKey) {
++      const kmsPolicy = new PolicyStatement({
++        effect: Effect.ALLOW,
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: [s3KmsKey.key.keyArn],
++      });
++      predictStreamFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      generateVideoFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      copyVideoJob.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteVideoJob.role?.addToPrincipalPolicy(kmsPolicy);
++      listVideoJobs.role?.addToPrincipalPolicy(kmsPolicy);
++      getSignedUrlFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      getFileDownloadSignedUrlFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      createMessagesFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteFileFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    }
++
++    // If KnowledgeBaseS3 File KMS exists, grant permission
++    if (knowledgeBaseS3KmsArn) {
++      const kmsPolicy = new PolicyStatement({
++        effect: Effect.ALLOW,
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: [knowledgeBaseS3KmsArn],
++      });
++      getFileDownloadSignedUrlFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    }
++
++    // If VideoTmpBucket KMS exists, grant permission
++    if (props.videoTmpBucketKmsKeyArnMap) {
++      const kmsKeyArnList: string[] = Object.values(
++        props.videoTmpBucketKmsKeyArnMap
++      );
++      const kmsPolicy = new PolicyStatement({
++        effect: Effect.ALLOW,
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: kmsKeyArnList,
++      });
++      generateVideoFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      copyVideoJob.role?.addToPrincipalPolicy(kmsPolicy);
++      deleteVideoJob.role?.addToPrincipalPolicy(kmsPolicy);
++      listVideoJobs.role?.addToPrincipalPolicy(kmsPolicy);
++      getSignedUrlFunction.role?.addToPrincipalPolicy(kmsPolicy);
++      getFileDownloadSignedUrlFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    }
++
+     this.api = api;
+     this.predictStreamFunction = predictStreamFunction;
+     this.invokeFlowFunction = invokeFlowFunction;
+diff --git a/packages/cdk/lib/construct/bleafsi-kms-key.ts b/packages/cdk/lib/construct/bleafsi-kms-key.ts
+new file mode 100644
+index 0000000..5b46b23
+--- /dev/null
++++ b/packages/cdk/lib/construct/bleafsi-kms-key.ts
+@@ -0,0 +1,103 @@
++// based on /resources/cdk-shared-constructs/lib/bleafsi-kms-keys.ts@v1.0.0
++import { Construct } from 'constructs';
++import { aws_kms as kms } from 'aws-cdk-lib';
++import { aws_iam as iam } from 'aws-cdk-lib';
++
++/* eslint-disable i18nhelper/no-jp-comment */
++
++/**
++ * KMS Key作成時のパラメータ
++ */
++export interface KmsKeyProps {
++  /**
++   * KMS Keyのalias
++   * @remarks
++   * アルファベット大文字・小文字 、数字、/_- のみ使用可
++   */
++  alias?: string;
++  /**
++   * KMS Keyの説明
++   */
++  description?: string;
++  /**
++   * true にすると自動ローテーション（年次）が有効になる
++   * @defaultValue
++   * true
++   */
++  enableKeyRotation?: boolean;
++}
++
++/**
++ * KMS Key を作成する Construct <br>
++ * See: [aws-cdk-lib.aws_kms.Key](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_kms.Key.html)
++ *
++ * @example デフォルト設定でKeyを作成
++ * ```
++ * import { KmsKey } from '../lib/bleafsi-kms-key';
++ *
++ * const kmskey = new KmsKey(this, 'S3Encryption');
++ * ```
++ *
++ * @example alias と descriptionを指定して作成
++ * ```
++ * import { KmsKey } from '../lib/bleafsi-kms-key';
++ *
++ * const kmskey = new KmsKey(this, 'CloudTrailEncryption', {
++ *   alias : 'alias/cloudtrail',
++ *   description : 'this key is used for encryption of CloudTrail trail'
++ * })
++ * ```
++ */
++export class KmsKey extends Construct {
++  /**
++   * 作成された KMS Key
++   */
++  readonly key: kms.IKey;
++  constructor(scope: Construct, id: string, props?: KmsKeyProps) {
++    super(scope, id);
++
++    //プロパティのデフォルト値設定
++    props = props ?? {};
++    props.description = props.description ?? `for ${id}`;
++    props.enableKeyRotation = props.enableKeyRotation ?? true;
++
++    const parameters: {
++      description: string;
++      enableKeyRotation: boolean;
++      alias?: string;
++    } = {
++      description: props?.description ?? `for ${id}`,
++      enableKeyRotation: props?.enableKeyRotation ?? true,
++      ...(props?.alias != null && { alias: props.alias }),
++    };
++    //KMS Key
++    const kmsKey = new kms.Key(this, 'Key', parameters);
++
++    this.key = kmsKey;
++  }
++
++  /**
++   * KMS Keyにリソースポリシーを追加する
++   *
++   * @param policy - 追加するIAMポリシーステートメント See: [aws_iam.PolicyStatement](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_iam.PolicyStatement.html)
++   *
++   * @example
++   * ```
++   * kmsKey.addToResourcePolicy(
++   *   new iam.PolicyStatement({
++   *     actions: ['kms:GenerateDataKey*'],
++   *     principals: [new iam.ServicePrincipal('cloudtrail.amazonaws.com')],
++   *     resources: ['*'],
++   *     conditions: {
++   *       StringLike: {
++   *         'kms:EncryptionContext:aws:cloudtrail:arn': [`arn:aws:cloudtrail:*:${cdk.Stack.of(this).account}:trail/*`],
++   *       },
++   *     },
++   *   }),
++   * );
++   * ```
++   */
++  addToResourcePolicy(policy: iam.PolicyStatement): void {
++    this.key.addToResourcePolicy(policy);
++  }
++}
+diff --git a/packages/cdk/lib/construct/closedNetwork/closed-vpc.ts b/packages/cdk/lib/construct/closedNetwork/closed-vpc.ts
+index a2ab949..7511985 100644
+--- a/packages/cdk/lib/construct/closedNetwork/closed-vpc.ts
++++ b/packages/cdk/lib/construct/closedNetwork/closed-vpc.ts
+@@ -1,6 +1,8 @@
+ import { Construct } from 'constructs';
+ import * as ec2 from 'aws-cdk-lib/aws-ec2';
+ import { PrivateHostedZone } from 'aws-cdk-lib/aws-route53';
++import { aws_logs as logs } from 'aws-cdk-lib';
++import { aws_iam as iam } from 'aws-cdk-lib';
+ 
+ const VPC_ENDPOINTS: Record<string, ec2.InterfaceVpcEndpointAwsService> = {
+   // VPC Endpoints required by user side
+@@ -46,6 +48,7 @@ export class ClosedVpc extends Construct {
+       vpc = new ec2.Vpc(this, 'ClosedVpc', {
+         ipAddresses: ec2.IpAddresses.cidr(props.ipv4Cidr),
+         maxAzs: 2,
++        flowLogs: {},
+         subnetConfiguration: [
+           {
+             name: 'isolated',
+@@ -53,6 +56,7 @@ export class ClosedVpc extends Construct {
+           },
+         ],
+       });
++      new VpcFlowLogs(this, 'VpcFlowLogs', vpc);
+     }
+ 
+     vpc.addGatewayEndpoint('S3GatewayEndpoint', {
+@@ -128,3 +132,27 @@ export class ClosedVpc extends Construct {
+     this.vpc = vpc;
+   }
+ }
++
++////// private Constructs and Functions //////////
++/*
++ * Create VPC Flow Logs
++ * 6 months retention period
++ */
++class VpcFlowLogs extends Construct {
++  constructor(scope: Construct, id: string, vpc: ec2.IVpc) {
++    super(scope, id);
++
++    const logGroup = new logs.LogGroup(this, 'LogGroup', {
++      retention: logs.RetentionDays.SIX_MONTHS,
++    });
++
++    const role = new iam.Role(this, 'LogRole', {
++      assumedBy: new iam.ServicePrincipal('vpc-flow-logs.amazonaws.com'),
++    });
++
++    new ec2.FlowLog(this, 'VpcFlowLogs', {
++      resourceType: ec2.FlowLogResourceType.fromVpc(vpc),
++      destination: ec2.FlowLogDestination.toCloudWatchLogs(logGroup, role),
++    });
++  }
++}
+diff --git a/packages/cdk/lib/construct/closedNetwork/closed-web.ts b/packages/cdk/lib/construct/closedNetwork/closed-web.ts
+index dd94a73..9b88a1d 100644
+--- a/packages/cdk/lib/construct/closedNetwork/closed-web.ts
++++ b/packages/cdk/lib/construct/closedNetwork/closed-web.ts
+@@ -19,6 +19,9 @@ import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patte
+ import { Platform, NetworkMode } from 'aws-cdk-lib/aws-ecr-assets';
+ import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+ 
++import { KmsKey } from '../bleafsi-kms-key';
++import { aws_ec2 as ec2 } from 'aws-cdk-lib';
++
+ export interface ClosedWebProps {
+   readonly vpc: IVpc;
+   readonly subnetIds?: string[] | null;
+@@ -35,9 +38,14 @@ export class ClosedWeb extends Construct {
+   constructor(scope: Construct, id: string, props: ClosedWebProps) {
+     super(scope, id);
+ 
++    const kmsKey = new KmsKey(this, 's3Encryption-ClosedWeb', {
++      description: 'this key is used for encryption of S3 in ClosedWeb ts',
++    });
++
+     const bucket = new s3.Bucket(this, 'WebBucket', {
+       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+-      encryption: s3.BucketEncryption.S3_MANAGED,
++      encryption: s3.BucketEncryption.KMS,
++      encryptionKey: kmsKey.key,
+       autoDeleteObjects: true,
+       removalPolicy: RemovalPolicy.DESTROY,
+       objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+@@ -58,9 +66,23 @@ export class ClosedWeb extends Construct {
+           }
+         : {};
+ 
++    const securityGroupForAlb = new ec2.SecurityGroup(this, 'SgAlb', {
++      vpc: props.vpc,
++      description: 'Security group for ALB - restricted to VPC',
++      allowAllOutbound: false,
++    });
++
++    securityGroupForAlb.addIngressRule(
++      ec2.Peer.ipv4(props.vpc.vpcCidrBlock),
++      ec2.Port.tcp(80),
++      'Allow HTTP from VPC'
++    );
++
+     const loadBalancer = new ApplicationLoadBalancer(this, 'Alb', {
+       vpc: props.vpc,
+       internetFacing: false,
++      securityGroup: securityGroupForAlb,
++      dropInvalidHeaderFields: true,
+       vpcSubnets: props.subnetIds
+         ? {
+             subnetFilters: [SubnetFilter.byIds(props.subnetIds)],
+@@ -88,6 +110,7 @@ export class ClosedWeb extends Construct {
+         },
+       },
+       loadBalancer,
++      openListener: false,
+       publicLoadBalancer: false,
+       runtimePlatform: {
+         cpuArchitecture: CpuArchitecture.X86_64,
+diff --git a/packages/cdk/lib/construct/database.ts b/packages/cdk/lib/construct/database.ts
+index 5df1f9b..6ff5d19 100644
+--- a/packages/cdk/lib/construct/database.ts
++++ b/packages/cdk/lib/construct/database.ts
+@@ -1,12 +1,17 @@
+ import { Construct } from 'constructs';
+ import * as ddb from 'aws-cdk-lib/aws-dynamodb';
++import { KmsKey } from './bleafsi-kms-key';
++
++export interface DatabaseProps {
++  readonly kmsKey: KmsKey;
++}
+ 
+ export class Database extends Construct {
+   public readonly table: ddb.Table;
+   public readonly statsTable: ddb.Table;
+   public readonly feedbackIndexName: string;
+ 
+-  constructor(scope: Construct, id: string) {
++  constructor(scope: Construct, id: string, props: DatabaseProps) {
+     super(scope, id);
+ 
+     const feedbackIndexName = 'FeedbackIndex';
+@@ -20,6 +25,9 @@ export class Database extends Construct {
+         type: ddb.AttributeType.STRING,
+       },
+       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
++      encryption: ddb.TableEncryption.CUSTOMER_MANAGED, // Custom KMS
++      encryptionKey: props.kmsKey.key,
++      pointInTimeRecovery: true, // Enable PITR
+     });
+ 
+     table.addGlobalSecondaryIndex({
+@@ -41,6 +49,9 @@ export class Database extends Construct {
+         type: ddb.AttributeType.STRING,
+       },
+       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
++      encryption: ddb.TableEncryption.CUSTOMER_MANAGED, // Custom KMS
++      encryptionKey: props.kmsKey.key,
++      pointInTimeRecovery: true, // Enable PITR
+     });
+ 
+     this.table = table;
+diff --git a/packages/cdk/lib/construct/generic-agent-core.ts b/packages/cdk/lib/construct/generic-agent-core.ts
+index 33fd480..6aaa673 100644
+--- a/packages/cdk/lib/construct/generic-agent-core.ts
++++ b/packages/cdk/lib/construct/generic-agent-core.ts
+@@ -20,6 +20,8 @@ import { BucketInfo } from 'generative-ai-use-cases';
+ import * as path from 'path';
+ import { LAMBDA_RUNTIME_NODEJS } from '../../consts';
+ 
++import { KmsKey } from './bleafsi-kms-key';
++
+ export interface AgentCoreRuntimeConfig {
+   name: string;
+   instructions?: string;
+@@ -29,11 +31,13 @@ export interface AgentCoreRuntimeConfig {
+   networkMode?: string; // PUBLIC
+   serverProtocol?: string; // HTTP, MCP
+   environmentVariables?: Record<string, string>;
++  kmsKeyArn: string;
+ }
+ 
+ export interface GenericAgentCoreProps {
+   // Add any specific configuration props if needed
+   env: string;
++  kmsKey: KmsKey;
+ }
+ 
+ // UUID for Agent Core Runtime
+@@ -49,12 +53,13 @@ export class GenericAgentCore extends Construct {
+   constructor(scope: Construct, id: string, props: GenericAgentCoreProps) {
+     super(scope, id);
+ 
+-    const { env } = props;
++    const { env, kmsKey } = props;
+ 
+     // Create dedicated S3 bucket for Agent Core Runtime
+     this._fileBucket = new Bucket(this, 'AgentCoreFileBucket', {
+       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+-      encryption: BucketEncryption.S3_MANAGED,
++      encryption: BucketEncryption.KMS,
++      encryptionKey: kmsKey.key,
+       removalPolicy: RemovalPolicy.DESTROY,
+       autoDeleteObjects: true,
+     });
+@@ -70,6 +75,7 @@ export class GenericAgentCore extends Construct {
+       environmentVariables: {
+         FILE_BUCKET: this._fileBucket.bucketName,
+       },
++      kmsKeyArn: kmsKey.key.keyArn,
+     };
+ 
+     // Deploy generic AgentCore Runtime
+@@ -196,7 +202,8 @@ export class GenericAgentCore extends Construct {
+         ],
+         conditions: {
+           StringEquals: {
+-            'iam:AWSServiceName': 'runtime-identity.bedrock-agentcore.amazonaws.com',
++            'iam:AWSServiceName':
++              'runtime-identity.bedrock-agentcore.amazonaws.com',
+           },
+         },
+       })
+@@ -378,6 +385,22 @@ export class GenericAgentCore extends Construct {
+       })
+     );
+ 
++    // KMS
++    role.addToPolicy(
++      new PolicyStatement({
++        sid: 'KMS',
++        effect: Effect.ALLOW,
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: [this.genericRuntimeConfig.kmsKeyArn],
++      })
++    );
++
+     return role;
+   }
+ 
+diff --git a/packages/cdk/lib/construct/guardrail.ts b/packages/cdk/lib/construct/guardrail.ts
+index 9958c83..a89d7e0 100644
+--- a/packages/cdk/lib/construct/guardrail.ts
++++ b/packages/cdk/lib/construct/guardrail.ts
+@@ -1,45 +1,259 @@
+ import { Construct } from 'constructs';
+ import { aws_bedrock as bedrock, Lazy, Names } from 'aws-cdk-lib';
++import { KmsKey } from './bleafsi-kms-key';
++import * as cdk from 'aws-cdk-lib';
++
++/* eslint-disable i18nhelper/no-jp-string */
+ 
+ export class Guardrail extends Construct {
+   public readonly guardrailIdentifier: string;
++  public readonly kmsArn: string;
+ 
+   constructor(scope: Construct, id: string) {
+     super(scope, id);
+ 
+     const suffix = Lazy.string({ produce: () => Names.uniqueId(this) });
+ 
++    // GuardRail KMS key
++    const guardRailKmsKey = new KmsKey(this, 'guardrailEncryption', {
++      description:
++        'this key is used for encryption of Bedrock Guardrail in Bleafsi genai rag chatbot',
++    });
++
++    // Cross Region ProfileID
++    let guardProfileID;
++    if (cdk.Stack.of(scope).region.startsWith('ap-')) {
++      guardProfileID = 'apac.guardrail.v1:0';
++    } else if (cdk.Stack.of(scope).region.startsWith('us-')) {
++      guardProfileID = 'us.guardrail.v1:0';
++    }
++    const crossRegionConfig = `arn:aws:bedrock:${cdk.Stack.of(scope).region}:${
++      cdk.Stack.of(scope).account
++    }:guardrail-profile/${guardProfileID}`;
++
+     const cfnGuardrail = new bedrock.CfnGuardrail(this, `guardrail`, {
++      crossRegionConfig: { guardrailProfileArn: crossRegionConfig },
++      description: '金融機関社内向けAIチャットボット用ガードレールサンプルです',
++      kmsKeyArn: guardRailKmsKey.key.keyArn,
++      name: `Guardrail-${suffix}`,
++      // Block Message
+       blockedInputMessaging:
+-        'Detected blocked input. Please start the conversation from the beginning or contact the administrator.',
++        'ご質問の内容が社内ポリシーに抵触する可能性があります。別の表現でお試しください。',
+       blockedOutputsMessaging:
+-        'Detected output that is prohibited. Please start the conversation from the beginning or contact the administrator.',
+-      name: `Guardrail-${suffix}`,
++        '申し訳ございませんが、この回答は社内ポリシーにより提供できません。',
++      contentPolicyConfig: {
++        filtersConfig: [
++          {
++            type: 'SEXUAL',
++            inputStrength: 'HIGH',
++            outputStrength: 'HIGH',
++            inputModalities: ['TEXT'],
++            outputModalities: ['TEXT'],
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++          },
++          {
++            type: 'VIOLENCE',
++            inputStrength: 'HIGH',
++            outputStrength: 'HIGH',
++            inputModalities: ['TEXT'],
++            outputModalities: ['TEXT'],
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++          },
++          {
++            type: 'HATE',
++            inputStrength: 'HIGH',
++            outputStrength: 'HIGH',
++            inputModalities: ['TEXT'],
++            outputModalities: ['TEXT'],
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++          },
++          {
++            type: 'INSULTS',
++            inputStrength: 'MEDIUM',
++            outputStrength: 'MEDIUM',
++            inputModalities: ['TEXT'],
++            outputModalities: ['TEXT'],
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++          },
++          {
++            type: 'MISCONDUCT',
++            inputStrength: 'HIGH',
++            outputStrength: 'HIGH',
++            inputModalities: ['TEXT'],
++            outputModalities: ['TEXT'],
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++          },
++          {
++            type: 'PROMPT_ATTACK',
++            inputStrength: 'HIGH',
++            outputStrength: 'NONE',
++            inputModalities: ['TEXT'],
++            outputModalities: ['TEXT'],
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++          },
++        ],
++        contentFiltersTierConfig: {
++          tierName: 'STANDARD', // JP
++        },
++      },
++      contextualGroundingPolicyConfig: {
++        filtersConfig: [
++          {
++            type: 'GROUNDING',
++            threshold: 0.8,
++            enabled: true,
++            action: 'BLOCK',
++          },
++          {
++            type: 'RELEVANCE',
++            threshold: 0.8,
++            enabled: true,
++            action: 'BLOCK',
++          },
++        ],
++      },
+       sensitiveInformationPolicyConfig: {
+-        // NAME, DRIVER_ID is not working in Japan, so do not set it
+-        // CA_*, US_*, UK_* are country-specific, so do not set it
+         piiEntitiesConfig: [
+-          { action: 'BLOCK', type: 'AGE' },
+           { action: 'BLOCK', type: 'AWS_ACCESS_KEY' },
+           { action: 'BLOCK', type: 'AWS_SECRET_KEY' },
+           { action: 'BLOCK', type: 'CREDIT_DEBIT_CARD_CVV' },
+           { action: 'BLOCK', type: 'CREDIT_DEBIT_CARD_EXPIRY' },
+           { action: 'BLOCK', type: 'CREDIT_DEBIT_CARD_NUMBER' },
+-          { action: 'BLOCK', type: 'EMAIL' },
+           { action: 'BLOCK', type: 'INTERNATIONAL_BANK_ACCOUNT_NUMBER' },
++          { action: 'BLOCK', type: 'PIN' },
++          { action: 'BLOCK', type: 'SWIFT_CODE' },
+           { action: 'BLOCK', type: 'IP_ADDRESS' },
+           { action: 'BLOCK', type: 'LICENSE_PLATE' },
+           { action: 'BLOCK', type: 'MAC_ADDRESS' },
+           { action: 'BLOCK', type: 'PASSWORD' },
+           { action: 'BLOCK', type: 'PHONE' },
+-          { action: 'BLOCK', type: 'PIN' },
+-          { action: 'BLOCK', type: 'SWIFT_CODE' },
++          { action: 'BLOCK', type: 'EMAIL' },
+           { action: 'BLOCK', type: 'URL' },
+           { action: 'BLOCK', type: 'USERNAME' },
++          { action: 'BLOCK', type: 'AGE' },
++        ],
++        regexesConfig: [
++          {
++            name: 'japanese-my-number',
++            description: 'マイナンバー（個人番号）の検出',
++            pattern: '\\b\\d{4}-\\d{4}-\\d{4}\\b|\\b\\d{12}\\b',
++            action: 'BLOCK',
++            inputEnabled: true,
++            outputEnabled: true,
++            inputAction: 'BLOCK',
++            outputAction: 'ANONYMIZE',
++          },
+         ],
+       },
++      topicPolicyConfig: {
++        topicsConfig: [
++          {
++            name: 'insider-trading',
++            type: 'DENY',
++            definition:
++              'インサイダー取引、内部情報の悪用、未公開情報の利用に関する内容',
++            examples: [
++              '未公開の決算情報を教えて',
++              'この株を買うべきか内部情報で教えて',
++              '明日発表予定の情報を先に教えて',
++            ],
++            inputEnabled: true,
++            outputEnabled: true,
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++          },
++          {
++            name: 'money-laundering',
++            type: 'DENY',
++            definition:
++              'マネーロンダリング、資金洗浄、不正な資金移動に関する内容',
++            examples: [
++              '現金を匿名で送金する方法',
++              '取引履歴を隠す方法',
++              '資金の出所を隠す方法',
++            ],
++            inputEnabled: true,
++            outputEnabled: true,
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++          },
++          {
++            name: 'regulatory-violation',
++            type: 'DENY',
++            definition:
++              '金融規制違反、法令違反、コンプライアンス違反に関する内容',
++            examples: [
++              '規制を回避する方法',
++              '報告義務を逃れる方法',
++              '監査を騙す方法',
++            ],
++            inputEnabled: true,
++            outputEnabled: true,
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++          },
++          {
++            name: 'customer-confidential-info',
++            type: 'DENY',
++            definition: '顧客の機密情報、取引情報、個人情報に関する内容',
++            examples: [
++              '顧客Aの取引履歴を教えて',
++              '特定顧客の資産情報',
++              '他の顧客の投資状況',
++            ],
++            inputEnabled: true,
++            outputEnabled: true,
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++          },
++        ],
++        // the properties below are optional
++        topicsTierConfig: {
++          tierName: 'STANDARD',
++        },
++      },
++
++      wordPolicyConfig: {
++        managedWordListsConfig: [
++          {
++            type: 'PROFANITY',
++            inputEnabled: true,
++            outputEnabled: true,
++            inputAction: 'BLOCK',
++            outputAction: 'BLOCK',
++          },
++        ],
++        // wordsConfig: [{
++        //   text: 'text',
++
++        //   // the properties below are optional
++        //   inputAction: 'inputAction',
++        //   inputEnabled: false,
++        //   outputAction: 'outputAction',
++        //   outputEnabled: false,
++        // }],
++      },
+     });
+ 
+     this.guardrailIdentifier = cfnGuardrail.attrGuardrailId;
++    this.kmsArn = guardRailKmsKey.key.keyArn;
+   }
+ }
+diff --git a/packages/cdk/lib/construct/transcribe.ts b/packages/cdk/lib/construct/transcribe.ts
+index c9a208f..7a01611 100644
+--- a/packages/cdk/lib/construct/transcribe.ts
++++ b/packages/cdk/lib/construct/transcribe.ts
+@@ -20,6 +20,8 @@ import { allowS3AccessWithSourceIpCondition } from '../utils/s3-access-policy';
+ import { LAMBDA_RUNTIME_NODEJS } from '../../consts';
+ import { ISecurityGroup, IVpc } from 'aws-cdk-lib/aws-ec2';
+ 
++import { KmsKey } from './bleafsi-kms-key';
++
+ export interface TranscribeProps {
+   readonly userPool: UserPool;
+   readonly idPool: IdentityPool;
+@@ -28,6 +30,7 @@ export interface TranscribeProps {
+   readonly allowedIpV6AddressRanges?: string[] | null;
+   readonly vpc?: IVpc;
+   readonly securityGroups?: ISecurityGroup[];
++  readonly kmsKey: KmsKey;
+ }
+ 
+ export class Transcribe extends Construct {
+@@ -35,7 +38,8 @@ export class Transcribe extends Construct {
+     super(scope, id);
+ 
+     const audioBucket = new Bucket(this, 'AudioBucket', {
+-      encryption: BucketEncryption.S3_MANAGED,
++      encryption: BucketEncryption.KMS,
++      encryptionKey: props.kmsKey.key,
+       removalPolicy: RemovalPolicy.DESTROY,
+       autoDeleteObjects: true,
+       enforceSSL: true,
+@@ -50,7 +54,8 @@ export class Transcribe extends Construct {
+     });
+ 
+     const transcriptBucket = new Bucket(this, 'TranscriptBucket', {
+-      encryption: BucketEncryption.S3_MANAGED,
++      encryption: BucketEncryption.KMS,
++      encryptionKey: props.kmsKey.key,
+       removalPolicy: RemovalPolicy.DESTROY,
+       autoDeleteObjects: true,
+       enforceSSL: true,
+@@ -174,5 +179,22 @@ export class Transcribe extends Construct {
+         ],
+       })
+     );
++
++    // Grant KMS permission
++    const kmsPolicy = new PolicyStatement({
++      effect: Effect.ALLOW,
++      actions: [
++        'kms:Encrypt*',
++        'kms:Decrypt*',
++        'kms:ReEncrypt*',
++        'kms:GenerateDataKey*',
++        'kms:Describe*',
++      ],
++      resources: [props.kmsKey.key.keyArn],
++    });
++
++    getSignedUrlFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    startTranscriptionFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    getTranscriptionFunction.role?.addToPrincipalPolicy(kmsPolicy);
+   }
+ }
+diff --git a/packages/cdk/lib/construct/use-case-builder.ts b/packages/cdk/lib/construct/use-case-builder.ts
+index 3011d1a..d049a04 100644
+--- a/packages/cdk/lib/construct/use-case-builder.ts
++++ b/packages/cdk/lib/construct/use-case-builder.ts
+@@ -15,11 +15,15 @@ import * as ddb from 'aws-cdk-lib/aws-dynamodb';
+ import { LAMBDA_RUNTIME_NODEJS } from '../../consts';
+ import { ISecurityGroup, IVpc } from 'aws-cdk-lib/aws-ec2';
+ 
++import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
++import { KmsKey } from './bleafsi-kms-key';
++
+ export interface UseCaseBuilderProps {
+   readonly userPool: UserPool;
+   readonly api: RestApi;
+   readonly vpc?: IVpc;
+   readonly securityGroups?: ISecurityGroup[];
++  readonly kmsKey: KmsKey;
+ }
+ export class UseCaseBuilder extends Construct {
+   constructor(scope: Construct, id: string, props: UseCaseBuilderProps) {
+@@ -38,6 +42,9 @@ export class UseCaseBuilder extends Construct {
+         type: ddb.AttributeType.STRING,
+       },
+       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
++      encryption: ddb.TableEncryption.CUSTOMER_MANAGED, // Custom KMS
++      encryptionKey: props.kmsKey.key,
++      pointInTimeRecovery: true,
+     });
+ 
+     useCaseBuilderTable.addGlobalSecondaryIndex({
+@@ -240,5 +247,27 @@ export class UseCaseBuilder extends Construct {
+       new LambdaIntegration(updateRecentlyUsedUseCaseFunction),
+       commonAuthorizerProps
+     );
++
++    // If dynamoDB KMS exists, grant permission
++    const kmsPolicy = new PolicyStatement({
++      effect: Effect.ALLOW,
++      actions: [
++        'kms:Encrypt*',
++        'kms:Decrypt*',
++        'kms:ReEncrypt*',
++        'kms:GenerateDataKey*',
++        'kms:Describe*',
++      ],
++      resources: [props.kmsKey.key.keyArn],
++    });
++
++    listUseCasesFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    createUseCaseFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    createUseCaseFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    deleteUseCaseFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    toggleFavoriteFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    toggleSharedFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    listRecentlyUsedUseCasesFunction.role?.addToPrincipalPolicy(kmsPolicy);
++    updateRecentlyUsedUseCaseFunction.role?.addToPrincipalPolicy(kmsPolicy);
+   }
+ }
+diff --git a/packages/cdk/lib/create-stacks.ts b/packages/cdk/lib/create-stacks.ts
+index 483573e..938e3ca 100644
+--- a/packages/cdk/lib/create-stacks.ts
++++ b/packages/cdk/lib/create-stacks.ts
+@@ -193,6 +193,7 @@ export const createStacks = (app: cdk.App, params: ProcessedStackInput) => {
+     ),
+   ];
+   const videoBucketRegionMap: Record<string, string> = {};
++  const videoTmpBucketKmsKeyArnMap: Record<string, string> = {};
+ 
+   for (const region of videoModelRegions) {
+     const videoTmpBucketStack = new VideoTmpBucketStack(
+@@ -208,6 +209,8 @@ export const createStacks = (app: cdk.App, params: ProcessedStackInput) => {
+     );
+ 
+     videoBucketRegionMap[region] = videoTmpBucketStack.bucketName;
++    videoTmpBucketKmsKeyArnMap[region] =
++      videoTmpBucketStack.videoTmpBucketKmsKeyArnMap;
+   }
+ 
+   const generativeAiUseCasesStack = new GenerativeAiUseCasesStack(
+@@ -227,15 +230,18 @@ export const createStacks = (app: cdk.App, params: ProcessedStackInput) => {
+       knowledgeBaseId: ragKnowledgeBaseStack?.knowledgeBaseId,
+       knowledgeBaseDataSourceBucketName:
+         ragKnowledgeBaseStack?.dataSourceBucketName,
++      knowledgeBaseDataSourceBucketKmsKeyArn: ragKnowledgeBaseStack?.kmsArn,
+       // Agent
+       agents: agentStack?.agents,
+       // Agent Core
+       agentCoreStack: agentCoreStack || undefined,
+       // Video Generation
+       videoBucketRegionMap,
++      videoTmpBucketKmsKeyArnMap,
+       // Guardrail
+       guardrailIdentifier: guardrail?.guardrailIdentifier,
+       guardrailVersion: 'DRAFT',
++      guardrailKmsKeyArn: guardrail?.kmsArn,
+       // WAF
+       webAclId: cloudFrontWafStack?.webAclArn,
+       // Custom Domain
+diff --git a/packages/cdk/lib/dashboard-stack.ts b/packages/cdk/lib/dashboard-stack.ts
+index db32ad4..56ed5c2 100644
+--- a/packages/cdk/lib/dashboard-stack.ts
++++ b/packages/cdk/lib/dashboard-stack.ts
+@@ -6,6 +6,9 @@ import * as cognito from 'aws-cdk-lib/aws-cognito';
+ import { ProcessedStackInput } from './stack-input';
+ import { ModelConfiguration } from 'generative-ai-use-cases';
+ 
++import * as iam from 'aws-cdk-lib/aws-iam';
++import { KmsKey } from './construct/bleafsi-kms-key';
++
+ export interface DashboardStackProps extends StackProps {
+   readonly params: ProcessedStackInput;
+   readonly userPool: cognito.UserPool;
+@@ -22,12 +25,60 @@ export class DashboardStack extends Stack {
+ 
+     const params = props.params;
+ 
++    const cloudwatchKmsKey = new KmsKey(this, 'CloudWatchEncryption', {
++      description: 'this key is used for encryption of CloudWatch',
++    });
++
+     // LogGroup for Bedrock logs
+     const logGroup = new logs.LogGroup(this, 'LogGroup', {
+       // Retain logs for 1 year
+       retention: logs.RetentionDays.ONE_YEAR,
++      encryptionKey: cloudwatchKmsKey.key,
++    });
++
++    // Service role for Bedrock Model invocation logging
++    const bedrockLoggingRole = new iam.Role(this, 'BedrockLoggingRole', {
++      assumedBy: new iam.ServicePrincipal('bedrock.amazonaws.com', {
++        conditions: {
++          StringEquals: {
++            'aws:SourceAccount': this.account,
++          },
++          ArnLike: {
++            'aws:SourceArn': `arn:aws:bedrock:${this.region}:${this.account}:*`,
++          },
++        },
++      }),
++      path: '/service-role/',
++      description:
++        'Role for Bedrock model invocation logging to CloudWatch Logs',
+     });
+ 
++    bedrockLoggingRole.addToPolicy(
++      new iam.PolicyStatement({
++        effect: iam.Effect.ALLOW,
++        actions: ['logs:CreateLogStream', 'logs:PutLogEvents'],
++        resources: [logGroup.logGroupArn],
++      })
++    );
++
++    cloudwatchKmsKey.addToResourcePolicy(
++      new iam.PolicyStatement({
++        effect: iam.Effect.ALLOW,
++        principals: [
++          bedrockLoggingRole,
++          new iam.ServicePrincipal(`logs.${this.region}.amazonaws.com`),
++        ],
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++        resources: ['*'],
++      })
++    );
++
+     const inputTokenCounts = params.modelIds.map(
+       (model: ModelConfiguration) => {
+         return new cw.Metric({
+@@ -169,6 +220,10 @@ export class DashboardStack extends Stack {
+       value: this.logGroup.logGroupName,
+     });
+ 
++    new CfnOutput(this, 'BedrockLogServiceRole', {
++      value: bedrockLoggingRole.roleArn,
++    });
++
+     new CfnOutput(this, 'DashboardName', {
+       value: this.dashboard.dashboardName,
+     });
+diff --git a/packages/cdk/lib/generative-ai-use-cases-stack.ts b/packages/cdk/lib/generative-ai-use-cases-stack.ts
+index 8255635..34745da 100644
+--- a/packages/cdk/lib/generative-ai-use-cases-stack.ts
++++ b/packages/cdk/lib/generative-ai-use-cases-stack.ts
+@@ -29,20 +29,25 @@ import {
+ import { Bucket } from 'aws-cdk-lib/aws-s3';
+ import { AgentCoreStack } from './agent-core-stack';
+ 
++import { KmsKey } from './construct/bleafsi-kms-key';
++
+ export interface GenerativeAiUseCasesStackProps extends StackProps {
+   readonly params: ProcessedStackInput;
+   // RAG Knowledge Base
+   readonly knowledgeBaseId?: string;
+   readonly knowledgeBaseDataSourceBucketName?: string;
++  readonly knowledgeBaseDataSourceBucketKmsKeyArn?: string;
+   // Agent
+   readonly agents?: Agent[];
+   // Agent Core
+   readonly agentCoreStack?: AgentCoreStack;
+   // Video Generation
+   readonly videoBucketRegionMap: Record<string, string>;
++  readonly videoTmpBucketKmsKeyArnMap: Record<string, string>;
+   // Guardrail
+   readonly guardrailIdentifier?: string;
+   readonly guardrailVersion?: string;
++  readonly guardrailKmsKeyArn?: string;
+   // WAF
+   readonly webAclId?: string;
+   // Custom Domain
+@@ -83,6 +88,16 @@ export class GenerativeAiUseCasesStack extends Stack {
+       ];
+     }
+ 
++    // Common KMS key for DynamoDB in this stack
++    const dynamoDBKmsKey = new KmsKey(this, 'genUStackdynamoDBEncryption', {
++      description: 'this key is used for encryption of DynamoDB in GenU stack',
++    });
++
++    // Common KMS key for S3 in this stack
++    const s3KMSKey = new KmsKey(this, 'genUStackS3Encryption', {
++      description: 'this key is used for encryption of S3 in GenU stack',
++    });
++
+     // Auth
+     const auth = new Auth(this, 'Auth', {
+       selfSignUpEnabled: params.selfSignUpEnabled,
+@@ -93,7 +108,9 @@ export class GenerativeAiUseCasesStack extends Stack {
+     });
+ 
+     // Database
+-    const database = new Database(this, 'Database');
++    const database = new Database(this, 'Database', {
++      kmsKey: dynamoDBKmsKey,
++    });
+ 
+     // API
+     const api = new Api(this, 'API', {
+@@ -102,6 +119,7 @@ export class GenerativeAiUseCasesStack extends Stack {
+       imageGenerationModelIds: params.imageGenerationModelIds,
+       videoGenerationModelIds: params.videoGenerationModelIds,
+       videoBucketRegionMap: props.videoBucketRegionMap,
++      videoTmpBucketKmsKeyArnMap: props.videoTmpBucketKmsKeyArnMap,
+       endpointNames: params.endpointNames,
+       customAgents: params.agents,
+       queryDecompositionEnabled: params.queryDecompositionEnabled,
+@@ -117,10 +135,14 @@ export class GenerativeAiUseCasesStack extends Stack {
+       userPoolClient: auth.client,
+       table: database.table,
+       statsTable: database.statsTable,
++      dynamoDBKmsKey: dynamoDBKmsKey,
++      s3KmsKey: s3KMSKey,
+       knowledgeBaseId: params.ragKnowledgeBaseId || props.knowledgeBaseId,
++      knowledgeBaseS3KmsArn: props.knowledgeBaseDataSourceBucketKmsKeyArn,
+       agents: props.agents,
+       guardrailIdentify: props.guardrailIdentifier,
+       guardrailVersion: props.guardrailVersion,
++      guardrailKmsKeyArn: props.guardrailKmsKeyArn,
+       vpc: props.vpc,
+       securityGroups,
+       apiGatewayVpcEndpoint: props.apiGatewayVpcEndpoint,
+@@ -325,6 +347,7 @@ export class GenerativeAiUseCasesStack extends Stack {
+         api: api.api,
+         vpc: props.vpc,
+         securityGroups,
++        kmsKey: dynamoDBKmsKey,
+       });
+     }
+ 
+@@ -337,6 +360,7 @@ export class GenerativeAiUseCasesStack extends Stack {
+       allowedIpV6AddressRanges: params.allowedIpV6AddressRanges,
+       vpc: props.vpc,
+       securityGroups,
++      kmsKey: s3KMSKey,
+     });
+ 
+     // Cfn Outputs
+diff --git a/packages/cdk/lib/guardrail-stack.ts b/packages/cdk/lib/guardrail-stack.ts
+index c80906f..72863b0 100644
+--- a/packages/cdk/lib/guardrail-stack.ts
++++ b/packages/cdk/lib/guardrail-stack.ts
+@@ -6,11 +6,13 @@ interface GuardrailStackProps extends StackProps {}
+ 
+ export class GuardrailStack extends Stack {
+   public readonly guardrailIdentifier: string;
++  public readonly kmsArn: string;
+ 
+   constructor(scope: Construct, id: string, props: GuardrailStackProps) {
+     super(scope, id, props);
+ 
+     const guardrail = new Guardrail(this, 'Guardrail');
+     this.guardrailIdentifier = guardrail.guardrailIdentifier;
++    this.kmsArn = guardrail.kmsArn;
+   }
+ }
+diff --git a/packages/cdk/lib/rag-knowledge-base-stack.ts b/packages/cdk/lib/rag-knowledge-base-stack.ts
+index d90d15e..590a202 100644
+--- a/packages/cdk/lib/rag-knowledge-base-stack.ts
++++ b/packages/cdk/lib/rag-knowledge-base-stack.ts
+@@ -10,6 +10,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
+ import { ProcessedStackInput } from './stack-input';
+ import { LAMBDA_RUNTIME_NODEJS, TAG_KEY } from '../consts';
+ 
++import { KmsKey } from './construct/bleafsi-kms-key';
++
+ const UUID = '339C5FED-A1B5-43B6-B40A-5E8E59E5734D';
+ 
+ // Embedding models supported by Bedrock
+@@ -133,6 +135,7 @@ export interface RagKnowledgeBaseStackProps extends StackProps {
+ export class RagKnowledgeBaseStack extends Stack {
+   public readonly knowledgeBaseId: string;
+   public readonly dataSourceBucketName: string;
++  public readonly kmsArn: string;
+ 
+   constructor(scope: Construct, id: string, props: RagKnowledgeBaseStackProps) {
+     super(scope, id, props);
+@@ -272,6 +275,10 @@ export class RagKnowledgeBaseStack extends Stack {
+       type: 'network',
+     });
+ 
++    const opensearchkmsKey = new KmsKey(this, 'OpenSearchEncryption', {
++      description: 'this key is used for encryption of OpenSearch',
++    });
++
+     const encryptionPolicy = new oss.CfnSecurityPolicy(
+       this,
+       'EncryptionPolicy',
+@@ -284,7 +291,8 @@ export class RagKnowledgeBaseStack extends Stack {
+               ResourceType: 'collection',
+             },
+           ],
+-          AWSOwnedKey: true,
++          AWSOwnedKey: false,
++          KmsARN: opensearchkmsKey.key.keyArn,
+         }),
+         type: 'encryption',
+       }
+@@ -340,9 +348,15 @@ export class RagKnowledgeBaseStack extends Stack {
+       })
+     );
+ 
++    const s3KmsKey = new KmsKey(this, 's3Encryption-rag-knowledge-base-stack', {
++      description:
++        'this key is used for encryption of S3 in rag-knowledge-base-stack stack',
++    });
++
+     const accessLogsBucket = new s3.Bucket(this, 'DataSourceAccessLogsBucket', {
+       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+-      encryption: s3.BucketEncryption.S3_MANAGED,
++      encryption: s3.BucketEncryption.KMS,
++      encryptionKey: s3KmsKey.key,
+       autoDeleteObjects: true,
+       removalPolicy: RemovalPolicy.DESTROY,
+       objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+@@ -351,7 +365,8 @@ export class RagKnowledgeBaseStack extends Stack {
+ 
+     const dataSourceBucket = new s3.Bucket(this, 'DataSourceBucket', {
+       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+-      encryption: s3.BucketEncryption.S3_MANAGED,
++      encryption: s3.BucketEncryption.KMS,
++      encryptionKey: s3KmsKey.key,
+       autoDeleteObjects: true,
+       removalPolicy: cdk.RemovalPolicy.DESTROY,
+       objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
+@@ -392,6 +407,21 @@ export class RagKnowledgeBaseStack extends Stack {
+       })
+     );
+ 
++    // Add KMS Policy
++    knowledgeBaseRole.addToPolicy(
++      new iam.PolicyStatement({
++        effect: iam.Effect.ALLOW,
++        resources: [opensearchkmsKey.key.keyArn, s3KmsKey.key.keyArn],
++        actions: [
++          'kms:Encrypt*',
++          'kms:Decrypt*',
++          'kms:ReEncrypt*',
++          'kms:GenerateDataKey*',
++          'kms:Describe*',
++        ],
++      })
++    );
++
+     const knowledgeBase = new bedrock.CfnKnowledgeBase(this, 'KnowledgeBase', {
+       name: collectionName,
+       roleArn: knowledgeBaseRole.roleArn,
+@@ -510,5 +540,6 @@ export class RagKnowledgeBaseStack extends Stack {
+ 
+     this.knowledgeBaseId = knowledgeBase.ref;
+     this.dataSourceBucketName = dataSourceBucket.bucketName;
++    this.kmsArn = s3KmsKey.key.keyArn;
+   }
+ }
+diff --git a/packages/cdk/lib/video-tmp-bucket-stack.ts b/packages/cdk/lib/video-tmp-bucket-stack.ts
+index 4aa66c6..d5258d8 100644
+--- a/packages/cdk/lib/video-tmp-bucket-stack.ts
++++ b/packages/cdk/lib/video-tmp-bucket-stack.ts
+@@ -8,19 +8,28 @@ import {
+ import * as iam from 'aws-cdk-lib/aws-iam';
+ import { ProcessedStackInput } from './stack-input';
+ 
++import { KmsKey } from './construct/bleafsi-kms-key';
++
+ export interface VideoTmpBucketStackProps extends StackProps {
+   readonly params: ProcessedStackInput;
+ }
+ 
+ export class VideoTmpBucketStack extends Stack {
+   public readonly bucketName: string;
++  public readonly videoTmpBucketKmsKeyArnMap: string;
+ 
+   constructor(scope: Construct, id: string, props: VideoTmpBucketStackProps) {
+     super(scope, id, props);
+     const params = props.params;
+ 
++    // KMS key for S3 in this stack
++    const s3KMSKey = new KmsKey(this, 'videoTmpStackS3Encryption', {
++      description: 'this key is used for encryption of S3 in videoTmp stack',
++    });
++
+     const bucket = new Bucket(this, 'Bucket', {
+-      encryption: BucketEncryption.S3_MANAGED,
++      encryption: BucketEncryption.KMS,
++      encryptionKey: s3KMSKey.key,
+       removalPolicy: RemovalPolicy.DESTROY,
+       autoDeleteObjects: true,
+       enforceSSL: true,
+@@ -40,5 +49,6 @@ export class VideoTmpBucketStack extends Stack {
+     }
+ 
+     this.bucketName = bucket.bucketName;
++    this.videoTmpBucketKmsKeyArnMap = s3KMSKey.key.keyArn;
+   }
+ }
+diff --git a/packages/cdk/parameter.ts b/packages/cdk/parameter.ts
+index 1b417e0..b27ad36 100644
+--- a/packages/cdk/parameter.ts
++++ b/packages/cdk/parameter.ts
+@@ -6,6 +6,8 @@ import {
+ } from './lib/stack-input';
+ import { ModelConfiguration } from 'generative-ai-use-cases';
+ 
++/* eslint-disable i18nhelper/no-jp-comment */
++
+ // Get parameters from CDK Context
+ const getContext = (app: cdk.App): StackInput => {
+   const params = stackInputSchema.parse(app.node.getAllContext());
+@@ -14,22 +16,41 @@ const getContext = (app: cdk.App): StackInput => {
+ 
+ // If you want to define parameters directly
+ const envs: Record<string, Partial<StackInput>> = {
+-  // If you want to define an anonymous environment, uncomment the following and the content of cdk.json will be ignored.
+-  // If you want to define an anonymous environment in parameter.ts, uncomment the following and the content of cdk.json will be ignored.
+-  // '': {
+-  //   // Parameters for anonymous environment
+-  //   // If you want to override the default settings, add the following
+-  // },
+-  dev: {
+-    // Parameters for development environment
+-  },
+-  staging: {
+-    // Parameters for staging environment
+-  },
+-  prod: {
+-    // Parameters for production environment
++  priv: {
++    region: 'ap-northeast-1',
++    modelRegion: 'ap-northeast-1',
++    modelIds: ['jp.anthropic.claude-sonnet-4-5-20250929-v1:0'],
++    imageGenerationModelIds: ['amazon.nova-canvas-v1:0'],
++    videoGenerationModelIds: ['amazon.nova-reel-v1:0'],
++    // Voice Chat は利用不可
++    speechToSpeechModelIds: [],
++    // 任意のオプション
++    ragEnabled: false,
++    ragKnowledgeBaseEnabled: true,
++    // CodeInterpreor は東京リージョン利用不可
++    agentEnabled: false,
++    mcpEnabled: true,
++    // AgentCore
++    createGenericAgentCoreRuntime: true,
++    agentCoreRegion: 'ap-northeast-1',
++    guardrailEnabled: true,
++    useCaseBuilderEnabled: true,
++    // Dashboard
++    dashboard: true,
++    // 以下は閉域のオプション
++    closedNetworkMode: true,
++    closedNetworkCreateTestEnvironment: true,
++    // ドメインを設定しない場合は以下の 2 つは不要
++    closedNetworkDomainName: 'genu.closed',
++    // closedNetworkCertificateArn:
++    //   '<your-certificate-arn>',
++    // // 既存の VPC を Subnet を指定する場合 (新規作成する場合は以下の 2 つは不要)
++    // closedNetworkVpcId: 'vpc-00000000000000000',
++    // closedNetworkSubnetIds: [
++    //   'subnet-11111111111111111',
++    //   'subnet-22222222222222222',
++    // ],
+   },
+-  // If you need other environments, customize them as needed
+ };
+ 
+ // For backward compatibility, get parameters from CDK Context > parameter.ts

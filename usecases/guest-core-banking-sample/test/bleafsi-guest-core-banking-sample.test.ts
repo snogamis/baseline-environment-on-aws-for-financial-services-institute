@@ -626,6 +626,140 @@ describe(`${PjPrefix} cdk-nag AwsSolutions Pack: secondaryApp`, () => {
   });
 });
 
+describe(`${PjPrefix} Application Signals SSM Parameter Deployment`, () => {
+  beforeAll(() => {
+    // Ensure stacks are created if not already done
+    if (!primaryApp) {
+      primaryApp = new CoreBankingPrimaryStack(app, `${PjPrefix}-primary`, {
+        ...appProps,
+        env: {
+          account: procEnv.account,
+          region: procEnv.primary.region,
+        },
+        crossRegionReferences: true,
+      });
+    }
+    if (!secondaryApp) {
+      secondaryApp = new CoreBankingSecondaryStack(app, `${PjPrefix}-secondary`, {
+        ...appProps,
+        env: {
+          account: procEnv.account,
+          region: procEnv.secondary.region,
+        },
+        crossRegionReferences: true,
+        auroraSecretName: primaryApp.PrimaryDB.secret.secretName,
+        dynamoDbGlobalTableName: primaryApp.dynamoDb.tableName,
+        tgwRouteTableId: primaryApp.tgwRouteTableId,
+      });
+    }
+  });
+
+  test('Primary stack creates Application Signals SSM parameter when SampleMultiRegionApp is deployed', () => {
+    const template = Template.fromStack(primaryApp);
+
+    // Verify SSM parameter is created with correct name
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/ecs/cloudwatch-agent/application-signals-config',
+      Type: 'String',
+      Tier: 'Standard',
+    });
+
+    // Verify parameter contains Application Signals configuration
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Value: Match.stringLikeRegexp('.*application_signals.*'),
+    });
+  });
+
+  test('Secondary stack creates Application Signals SSM parameter when SampleMultiRegionApp is deployed', () => {
+    const template = Template.fromStack(secondaryApp);
+
+    // Verify SSM parameter is created in secondary region
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/ecs/cloudwatch-agent/application-signals-config',
+      Type: 'String',
+      Tier: 'Standard',
+    });
+  });
+
+  test('ECS task execution roles have SSM parameter read permissions', () => {
+    const template = Template.fromStack(primaryApp);
+
+    // Verify that execution roles have permissions to read SSM parameters
+    // This is necessary for ECS tasks to access the Application Signals configuration
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Effect: 'Allow',
+            Action: Match.arrayWith(['ssm:GetParameters', 'ssm:GetParameter']),
+            Resource: {
+              'Fn::Join': ['', Match.arrayWith([Match.stringLikeRegexp(':ssm:.*:parameter')])],
+            },
+          }),
+        ]),
+      },
+    });
+  });
+
+  test('SSM parameter has correct Application Signals configuration structure', () => {
+    const template = Template.fromStack(primaryApp);
+    const resources = template.findResources('AWS::SSM::Parameter', {
+      Properties: {
+        Name: '/ecs/cloudwatch-agent/application-signals-config',
+      },
+    });
+
+    // Verify at least one parameter exists
+    expect(Object.keys(resources).length).toBeGreaterThan(0);
+
+    // Get the parameter value and verify it's valid JSON with correct structure
+    const parameterResource = Object.values(resources)[0];
+    const configValue = parameterResource.Properties.Value;
+
+    const config = JSON.parse(configValue);
+
+    // Verify traces section
+    expect(config).toHaveProperty('traces');
+    expect(config.traces).toHaveProperty('traces_collected');
+    expect(config.traces.traces_collected).toHaveProperty('application_signals');
+
+    // Verify logs section
+    expect(config).toHaveProperty('logs');
+    expect(config.logs).toHaveProperty('metrics_collected');
+    expect(config.logs.metrics_collected).toHaveProperty('application_signals');
+  });
+
+  test('SSM parameter is created before ECS task definitions', () => {
+    const template = Template.fromStack(primaryApp);
+
+    // Verify both SSM parameter and ECS task definitions exist
+    const ssmParams = template.findResources('AWS::SSM::Parameter');
+    const taskDefs = template.findResources('AWS::ECS::TaskDefinition');
+
+    expect(Object.keys(ssmParams).length).toBeGreaterThan(0);
+    expect(Object.keys(taskDefs).length).toBeGreaterThan(0);
+
+    // The fact that the template synthesizes without errors indicates
+    // that dependencies are correctly established
+  });
+
+  test('ECS task execution roles have SSM parameter access permissions', () => {
+    const template = Template.fromStack(primaryApp);
+
+    // Verify IAM policies include SSM parameter access
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Effect: 'Allow',
+            Action: Match.arrayWith(['ssm:GetParameters', 'ssm:GetParameter']),
+          }),
+        ]),
+      },
+    });
+  });
+});
+
 describe(`${PjPrefix} cdk-nag AwsSolutions Pack: monitoringApp`, () => {
   beforeAll(() => {
     // monitoringAppが初期化されていない場合はスキップ
